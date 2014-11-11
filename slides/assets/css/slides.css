@@ -127,7 +127,7 @@ em.term {
 }
 
 .story + .story {
-/*  display: none;*/
+  display: none;
 }
 
 .example {
@@ -148,7 +148,7 @@ em.term {
 }
 
 .example + .example {
-/*  display: none;*/
+  display: none;
 }
 
 .example.success + .example {
