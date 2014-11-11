@@ -10,7 +10,7 @@ $(function() {
       
       var editor = ace.edit(e)
       editor.getSession().setMode("ace/mode/scala")
-      editor.setTheme("ace/theme/chrome")
+      editor.setTheme("ace/theme/slides")
       editor.setReadOnly(true)
       editor.setDisplayIndentGuides(false)
       editor.setHighlightActiveLine(false)
