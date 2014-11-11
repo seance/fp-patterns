@@ -7,8 +7,8 @@ import spray.can.server._
 import spray.can.websocket._
 import spray.can.websocket.frame._
 import spray.routing._
+import spray.http._
 import com.typesafe.config._
-import scala.concurrent.duration._
   
 object Slides extends App {
   
@@ -30,7 +30,7 @@ class HttpSlides extends Actor with HttpService {
       getFromDirectory("assets")
     } ~
     pathEndOrSingleSlash {
-      getFromFile("assets/html/index.html")
+      redirect("/assets/html/index.html", StatusCodes.PermanentRedirect)
     }
   }
 }
