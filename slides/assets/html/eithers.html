@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Slides</title>
+  <script src="../js/jquery.min.js"></script>
+  <script src="../js/ace.js"></script>
+  <script src="../js/theme-slides.js"></script>
+  <script src="../js/mode-scala.js"></script>
+  <script src="../js/slides.js"></script>
+  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Raleway:600|Open+Sans:300,400|Source+Sans+Pro:300'>
+  <link rel="stylesheet" href="../css/slides.css">
+</head>
+<body>
+
+<div class="container">
+
+  <h1>The Either Pattern</h1>
+  
+  <p class="note">
+    To get started, remember to run <span class="cmd">sbt</span> and then run
+    <span class="cmd">~test-only Eithers</span> from the <span class="cmd">sbt</span>
+    console!
+  </p>
+  
+  <article class="story carrot-left">
+    <header class="topic topic-right">
+      Either basics
+    </header>
+    <p>The next functional programming pattern we'll study is <em class="term">Either</em>.</p>
+    <p>Either[A, B] represents <em>either</em> a value of type A <em>or</em> of type B. Either has two concrete instance types, Left[A] and Right[B], whose type parameters correspond to the first and second type parameters of their static Either type respectively.</p>
+    <p>Like Option, Either is typically used with computations that may or may not succeed, but Either provides extra information via Left.</p>
+    <p>When used to indicate whether a computation succeeded, Left usually represents failure, while Right represents success.</p>
+  </article>
+  
+  <article class="story emerald-right">
+    <header class="topic topic-left">
+      Folding and introspecting
+    </header>
+  </article>
+  
+  <article class="story peterriver-left">
+    <header class="topic topic-right">
+      Projections and bias
+    </header>
+  </article>
+  
+  <article class="story sunflower-right">
+    <header class="topic topic-left">
+      Composition of projections using map
+    </header>
+  </article>
+  
+  <article class="story turquoise-left">
+    <header class="topic topic-right">
+      Composition of projections using flatMap
+    </header>
+  </article>
+  
+  <article class="story amethyst-right">
+    <header class="topic topic-left">
+      Composition of projections using for yield
+    </header>
+  </article>
+  
+  <article class="story carrot-left">
+    <header class="topic topic-right">
+      Joining nested projections
+    </header>
+  </article>
+  
+  <article class="story emerald-right">
+    <header class="topic topic-left">
+      Summary
+    </header>
+    <p>
+    </p>
+  </article>
+  
+  <footer>
+    Functional Programming Patterns | Jukka Viinamäki | Futurice
+  </footer>
+</div>  
+</body>
+</html>
