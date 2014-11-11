@@ -128,7 +128,7 @@ class Options extends Meditation {
       b <- bar(a+1)
       c <- zut(foo(b-1))
     }
-    yield a+b+c
+    yield a + b + c
       
     "Functions can be combined freely with Option composition" ! {
       (quux(3) must_== __) and
