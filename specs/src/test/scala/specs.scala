@@ -2,7 +2,7 @@ import foo.specs._
 
 class Options extends Meditation {
   
-  "Option's basics" in {
+  "Option basics" in {
     
     "Some represents a present value" ! (__ must beSome(42))
 
