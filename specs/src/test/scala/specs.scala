@@ -4,7 +4,7 @@ class Options extends Meditation {
   
   "Option basics" in {
     
-    "Some represents a present value" ! (__ must beSome(42))
+    "Some wraps a value" ! (__ must beSome(42))
 
     "None represents a missing value" ! (__ must beNone)
   }

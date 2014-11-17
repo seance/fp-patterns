@@ -2,18 +2,21 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Slides</title>
+  <title>Option</title>
+  <link rel="icon" href="../img/favicon.ico" type="image/x-icon">
+  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Raleway:600|Open+Sans:300,400|Source+Sans+Pro:300'>
+  <link rel="stylesheet" href="../css/slides.css">
   <script src="../js/jquery.min.js"></script>
   <script src="../js/ace.js"></script>
   <script src="../js/theme-slides.js"></script>
   <script src="../js/mode-scala.js"></script>
   <script src="../js/slides.js"></script>
-  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Raleway:600|Open+Sans:300,400|Source+Sans+Pro:300'>
-  <link rel="stylesheet" href="../css/slides.css">
 </head>
 <body>
 
 <div class="container">
+  
+  <div class="connection"></div>
 
   <h1>The Option Pattern</h1>
   
@@ -28,10 +31,16 @@
       Option basics
     </header>
     <p>The first functional programming pattern we'll look at is <em class="term">Option</em>, also known as <em class="term">Maybe</em>.</p>
-    <p>Option[A] represents a <em>possible</em> value of type A. Option has two concrete instance types, Some[A] and None, representing a present value and lack thereof, respectively.</p>
-    <p>Option is used similarly to null, but offers some advantages in comparison.</p>
-    <p>Firstly, by grace of its static type, it harnesses the compiler to remind us that the value may be missing. Secondly, while null is not a proper value &mdash; any invocations causing NPEs &mdash; None is, and it fulfills the Option contract.</p>
-    <div class="example" data-name="Some represents a present value"></div>
+    <p>We're all familiar with methods that return null when no other thing makes sense. Some methods take optional parameters represented by null.</p>
+    <p>In both cases, our code will be riddled with null check <span class="cmd">if</span>s, making it verbose, and obscuring the main flow of logic. And should you forget a check, you're setting up for a null pointer exception, potentially killing your thread. <em>Sigh</em>. If only there was a better way.</p>
+    <p>There is!</p>
+    <p>Option[A] represents a <em>possible</em> value of type A. Option has two concrete instance types, Some[A] and None. Some wraps a value, while None is used when there is no value.</p>
+    <pre class="code">
+def mustBeOverFour(x: Int): Option[String] = if (x > 4) Some("High five!") else None    
+    </pre>
+    
+    <p>Option, by grace of its static type, harnesses the compiler to remind us that the value may be missing. Further, while null is not a proper value &mdash; any invocations causing NPEs &mdash; None is, and it fulfills the Option contract.</p>
+    <div class="example" data-name="Some wraps a value"></div>
     <div class="example" data-name="None represents a missing value"></div>
   </article>
 
@@ -39,7 +48,8 @@
     <header class="topic topic-left">
       Unwrapping and introspecting
     </header>
-    <p>Once a value has been lifted into Option, to use the actual value, we must first unpackage it. We may introspect the Option instance to find out if it contains a value.</p>
+    <p>So, now our functions take and/or return Options. But eventually, we'll need the actual value to use it &mdash; that is, if it actually <em>is</em> there.</p>
+    <p>To find out, we can use introspection, use <em>get</em> to unwrap the value, or get with a fallback. Let's recall that our Option instances are actually always instances of Some, or None, with Option being an abstract supertype.</p>
     <div class="example" data-name="Introspecting reveals a value is present"></div>
     <div class="example" data-name="Or it may reveal that there is no value"></div>
     <div class="example" data-name="Option's value can be retrieved using get"></div>
@@ -54,18 +64,19 @@
     <p>What we've seen so far hasn't been terribly impressive.</p>
     <p>We've seen how Option may help us with static typing and nulls, but why would we bother to do all this wrapping and unwrapping?</p>
     <p>The answer to this question lies in <em class="term">composition</em>.</p>
-    <p>Suppose we have a computation that may or may not produce a valid result &mdash; one example of such computation would be square root under ℝ. Then, we wish to transform the result of the computation.</p>
-    <p>Using traditional means, we'd be stuck with checking for null (or some special value) before applying the transformation.</p>
+    <p>Let's take the example of square root with real numbers. We need a function that computes the square root of a given number, and then adds one to the result. But, as we know, square root is only defined for positive numbers in &#8477;.</p>
+    <p>Using traditional means, we'd be stuck with checking for null (or some special value) from the square root before incrementing it:</p>
     <pre class="code">
 val result = sqrt(value) // def sqrt(x: java.lang.Double): java.lang.Double
 if (result != null)
-  transform(result)
+  increment(result)
     </pre>
-    <p>Instead, using Option, we may compose the computations using the <em class="term">map</em> composition operator, also known as <em class="term">fmap</em>.</p>
+    <p>Instead, if sqrt was defined using Option, we could <em>compose</em> the computations using the <em class="term">map</em> composition operator, also known as <em class="term">fmap</em>:</p>
     <pre class="code">
-sqrt(value).map(transform) // def sqrt(x: Double): Option[Double]
+sqrt(value).map(increment) // def sqrt(x: Double): Option[Double]
     </pre>
-    <p>This works irrespective of whether the sqrt computation succeeded or not, since the modality of the result is already encapsulated in <em>map</em>'s logic.</p>
+    <p>This works irrespective of whether the sqrt computation succeeds or not, since the modality of the result is already encapsulated in <em>map</em>'s logic.</p>
+    <p>This quality, compositionality, is the key aspect of Option, and of the other patterns.</p>
     <div class="example" data-name="Mapping over Some produces Some"></div>
     <div class="example" data-name="Mapping over None is fine too, and produces None"></div>
     <div class="example" data-name="Things get interesting when combining compositions"></div>
@@ -77,7 +88,7 @@ sqrt(value).map(transform) // def sqrt(x: Double): Option[Double]
     <header class="topic topic-left">
       Composition using flatMap
     </header>
-    <p>We've seen how Option can simplify and streamline our code when used compositionally. When composing "simple" computations, we don't need to know whether the Option is defined or not, since <em>map</em> will do that for us.</p>
+    <p>We've seen how Option can simplify and streamline our code when used compositionally. When composing "simple" computations, we don't need to know whether the Option is defined (Some) or not, since <em>map</em> will do that for us.</p>
     <p>How does map work for Option? Very simply, using basic functions, as it turns out.</p>
     <p>A basic Scala implementation for map, as defined in the Option class might be as follows.</p>
     <pre class="code">
@@ -99,7 +110,7 @@ sqrt(81).map(sqrt).map(increment) // will not compile
     </pre>
     <p>It seems we cannot compose sqrt with itself in this manner without breaking compositionality. As it turns out, composing a computation that produces another Option is a special case for Option.</p>
     <p>For this purpose, we use the special composition operator, <em class="term">flatMap</em>, also known as <em class="term">>>=</em> or <em class="term">bind</em>.</p>
-    <p>The key motivation for understanding the need for having a special operator for composing contextual values is in looking at the composed computation from the perspective of the end result.</p>
+    <p>The key motivation for understanding the need for having a special operator for composing contextual values is in looking at the end result.</p>
     <p>In a computation involving multiple Option-producing subcomputations, the totality of the "uncertainty" of having a final result does not change &mdash; we either get a value or we don't. Generally this is what we want.</p>
     <div class="example" data-name="Composing sqrt with itself"></div>
     <div class="example" data-name="Composing the result of the above composition"></div>
@@ -111,7 +122,7 @@ sqrt(81).map(sqrt).map(increment) // will not compile
       Composition using for yield
     </header>
     <p>Composing Option-producing computations using <em>flatMap</em> is so useful that there exists a special syntax for it in Scala. In fact, this special syntax works for all the other patterns studied in this tutorial as well. Similar constructs are also found in other languages besides Scala.</p>
-    <p>In Scala, this syntax is knows as <em class="term">for yield</em> (or alternatively <em>for comprehension</em>). It should not be confused with its cousin <em>for</em> which is useful for side effects.</p>
+    <p>In Scala, this syntax is known as <em class="term">for yield</em> (or alternatively <em>for comprehension</em>). It should not be confused with its cousin <em>for</em> which is useful for side effects.</p>
     <p>The <em>for yield</em> form can be written in two different ways: using parentheses with semicolons, or with curly braces on separate lines.</p>
     <pre class="code">
 // parentheses with semicolons    
