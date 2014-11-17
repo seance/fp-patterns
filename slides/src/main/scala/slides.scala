@@ -49,7 +49,7 @@ class WsSlides extends Actor {
       workers.foreach(_ ! Push(s"""{"success": true, "name": "$name"}"""))
       
     case ("failure", name, message) =>
-      println(s"Failure: $name")
+      println(s"Failure: $name, $message")
       workers.foreach(_ ! Push(s"""{"success": false, "name": "$name", "message": "$message"}"""))
   }
 }
