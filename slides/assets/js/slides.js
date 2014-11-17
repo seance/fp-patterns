@@ -66,9 +66,22 @@ $(function() {
   
   function receiveMessages() {
     var ws = new WebSocket("ws://localhost:8001")
+    
     ws.onmessage = function(e) {
       processMessage(JSON.parse(e.data))
     }
+    ws.onopen = function(e) {
+      $('.connection').addClass('connected')
+    }
+    ws.onclose = function(e) {
+      console.log('Socket close', e)
+      $('.connection').removeClass('connected')
+      reconnectSocket()
+    }
+  }
+  
+  function reconnectSocket() {
+    setTimeout(receiveMessages, 5000)
   }
   
   prepareSnippets()
