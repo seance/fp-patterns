@@ -35,10 +35,12 @@ class AkkaNotifier extends Notifier {
   }
   
   def exampleSuccess(name: String, duration: Long) = {
+    println(s"exampleSuccess: $name")
     actor ! ("success", name)
   }
   
   def exampleFailure(name: String, message: String, location: String, f: Throwable, details: org.specs2.execute.Details, duration: Long): Unit = {
+    println(s"exampleFailure: $name, $message")
     actor ! ("failure", name, message)
   }
   
