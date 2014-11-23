@@ -18,7 +18,7 @@ class Eithers extends Meditation {
       
     "Or if we have a Left instance" ! (e2.isLeft must_== __)
       
-    "Folding yields an unwrapped value" ! {
+    "Folding produces an unwrapped value" ! {
       e1.fold(left => s"It's Left",
               right => s"It's Right") must_== __
     }
@@ -154,15 +154,15 @@ class Eithers extends Meditation {
      */
     def slurp(url: String): Either[String, String] = __
     
-    "Slurping from a good URL should yield its contents" ! {
+    "Slurping from a good URL should yield its contents #2" ! {
       slurp("host0") must beRight("Host 0 contents")
     }
     
-    "Slurping from a valid but odd host should result in read error" ! {
+    "Slurping from a valid but odd host should result in read error #2" ! {
       slurp("host1") must beLeft("Error reading host 1")
     }
     
-    "Slurping from an invalid URL must result in connect error" ! {
+    "Slurping from an invalid URL must result in connect error #2" ! {
       slurp("invalid") must beLeft("Connection refused")
     }
     

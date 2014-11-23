@@ -40,6 +40,8 @@ def overFourButNoMore(x: Int): Either[String, Int] =
     </pre>
     <p>Like Option, Either is typically used with computations that may or may not succeed. Right usually wraps the success value, while Left wraps the failure value.</p>
     <p>If we invoke function from the above snippet with a value less than five, we'll get a Left back &mdash; and that Left contains a message that will help us understand what went wrong.</p>
+    <div class="example" data-name="Right wraps success value"></div>
+    <div class="example" data-name="Left wraps error value"></div>
   </article>
   
   <article class="story emerald-right">
@@ -49,6 +51,10 @@ def overFourButNoMore(x: Int): Either[String, Int] =
     <p>Just like with Option, with Either, we don't initially know whether we actually have a Right or Left instance.</p>
     <p>Again, to find out, we can use introspection. However, to get an actual, unwrapped value, we can't just use a <em>get</em>, since now we're dealing with <em>two</em> possible types. Giving a fallback value would not work either, for the same reason.</p>
     <p>Instead, we have a new operation called <em>fold</em>, which takes two functions. The key is that the return type of both functions is unified. Only one of the functions is actually invoked, depending on whether the Either was a Left or a Right, and the return value of that function becomes the return value of <em>fold</em>.</p>
+    <div class="example" data-name="We can check if we have a Right instance"></div>
+    <div class="example" data-name="Or if we have a Left instance"></div>
+    <div class="example" data-name="Folding produces an unwrapped value"></div>
+    <div class="example" data-name="Folding can be used as a fallback also"></div>
   </article>
   
   <article class="story peterriver-left">
@@ -59,6 +65,8 @@ def overFourButNoMore(x: Int): Either[String, Int] =
     <p>Scala's standard library implementation of Either is <em>unbiased</em>. This means that Scala leaves that decision for the user, to be decided each time Either is used.</p>
     <p>The desired biasing is indicated using one of the Either's <em>projection</em> methods, <em>left</em> and <em>right</em>. These are very different than the introspection methods, isLeft and isRight!</p>
     <p>Just <em>why</em> we need projections will be clearer in the next section. For now, just take it on faith that we have projections because we don't have bias.</p>
+    <div class="example" data-name="Use the 'right' method to get a Right projection"></div>
+    <div class="example" data-name="Left projection is seldom needed in practise"></div>
   </article>
   
   <article class="story sunflower-right">
@@ -78,6 +86,12 @@ either.map(x => x + 1) // will not compile, map is not a method of Either
 either.right.map(x => x + 1) // will compile, map is a method of the projection
     </pre>
     <p>Now, it's more clear what x is, since we're telling that we want to transform the right hand side. If our instance is a Left, it will remain unchanged, just like with None. If our instance is a Right, we'll increment its value by one.</p>
+    <div class="example" data-name="Mapping over right projection makes Right analogous to Some"></div>
+    <div class="example" data-name="Mapping over left projection is similar for Left"></div>
+    <div class="example" data-name="With a right projection, Left is inert over mapping"></div>
+    <div class="example" data-name="With a left projection, Right is similarly inert"></div>
+    <div class="example" data-name="With map's static signature, each map must be preceded by projection"></div>
+    <div class="example" data-name="This is true for left projection also"></div>
   </article>
   
   <article class="story turquoise-left">
@@ -104,6 +118,11 @@ def slurp(url: String): Either[String, String]
     </pre>
     <p>Specifically, we indicate in its type signature that it may or may not fail, but not succeed partially. However, should it fail, we want the <em>particular</em> error message that caused the composite operation to fail.</p>
     <p>For our implementation of slurp, we'll use Right for success, as is usual &mdash; hence we'll need a right projection. We'll compose the helper functions using flatMap.</p>
+    <div class="example" data-name="Slurping from a good URL should yield its contents"></div>
+    <div class="example" data-name="Slurping from a valid but odd host should result in read error"></div>
+    <div class="example" data-name="Slurping from an invalid URL must result in connect error"></div>
+    <div class="example" data-name="What happens if we slurp two URLs?"></div>
+    <div class="example" data-name="What if one of them is bad?"></div>
   </article>
   
   <article class="story amethyst-right">
@@ -112,6 +131,12 @@ def slurp(url: String): Either[String, String]
     </header>
     <p>As promised earlier, the <em>for yield</em> construct works for Either as well. Its use can significantly clean up our code when there are multiple flatMappings happening.</p>
     <p>Using for yield for Either is very similar as for Option, but as with regular composition using map and flatMap, we must remember to use the appropriate projections. Recall that for yield is simply syntactic sugar.</p>
+    <div class="example" data-name="Slurping from a good URL should yield its contents #2"></div>
+    <div class="example" data-name="Slurping from a valid but odd host should result in read error #2"></div>
+    <div class="example" data-name="Slurping from an invalid URL must result in connect error #2"></div>
+    <div class="example" data-name="Slurping two good URLs with slurpConcat"></div>
+    <div class="example" data-name="Slurping good and bad URL with slurpConcat"></div>
+    <div class="example" data-name="Slurping bad and good URL with slurpConcat"></div>
   </article>
   
   <article class="story carrot-left">
