@@ -1,4 +1,4 @@
-package foo.specs
+package fpp.specs
 
 import org.specs2.mutable._
 import org.specs2.reporter._

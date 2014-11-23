@@ -36,7 +36,7 @@
     <p>There is!</p>
     <p>Option[A] represents a <em>possible</em> value of type A. Option has two concrete instance types, Some[A] and None. Some wraps a value, while None is used when there is no value.</p>
     <pre class="code">
-def mustBeOverFour(x: Int): Option[String] = if (x > 4) Some("High five!") else None    
+def highFive(x: Int): Option[String] = if (x > 4) Some("High five!") else None    
     </pre>
     
     <p>Option, by grace of its static type, harnesses the compiler to remind us that the value may be missing. Further, while null is not a proper value &mdash; any invocations causing NPEs &mdash; None is, and it fulfills the Option contract.</p>
@@ -48,7 +48,7 @@ def mustBeOverFour(x: Int): Option[String] = if (x > 4) Some("High five!") else 
     <header class="topic topic-left">
       Unwrapping and introspecting
     </header>
-    <p>So, now our functions take and/or return Options. But eventually, we'll need the actual value to use it &mdash; that is, if it actually <em>is</em> there.</p>
+    <p>So, now our functions take and/or return Options. But eventually, we'll need the actual, unwrapped value to use it &mdash; that is, if it actually <em>is</em> there.</p>
     <p>To find out, we can use introspection, use <em>get</em> to unwrap the value, or get with a fallback. Let's recall that our Option instances are actually always instances of Some, or None, with Option being an abstract supertype.</p>
     <div class="example" data-name="Introspecting reveals a value is present"></div>
     <div class="example" data-name="Or it may reveal that there is no value"></div>
@@ -184,8 +184,8 @@ option.flatten === option.flatMap(identity)
           <li><p><em class="term">flatten</em> aka <em class="term">join</em> can be used to flatten nested Options</p></li>
         </ul>
       </li>
-      <li><p>Composition simplifies and cleans up our code (happy paths)</p></li>
     </ul>
+    <p>A well-crafted piece of software is typically broken in to a loosely coupled but highly cohesive set of units. How these pieces are used in combination, or composed, is therefore of interest. Functional composition offers a uniform, well defined way to do just that, when our units are functions.</p>
     <p>You may now take a moment to admire your virtuosity, and then proceed to meditate on <em class="term"><a href="eithers.html">Either</a></em>.</p>
   </article>
   <footer>

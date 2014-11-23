@@ -3,13 +3,14 @@
 <head>
   <meta charset="utf-8">
   <title>Either</title>
+  <link rel="icon" href="../img/favicon.ico" type="image/x-icon">
+  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Raleway:600|Open+Sans:300,400|Source+Sans+Pro:300'>
+  <link rel="stylesheet" href="../css/slides.css">
   <script src="../js/jquery.min.js"></script>
   <script src="../js/ace.js"></script>
   <script src="../js/theme-slides.js"></script>
   <script src="../js/mode-scala.js"></script>
   <script src="../js/slides.js"></script>
-  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Raleway:600|Open+Sans:300,400|Source+Sans+Pro:300'>
-  <link rel="stylesheet" href="../css/slides.css">
 </head>
 <body>
 
@@ -30,51 +31,125 @@
       Either basics
     </header>
     <p>The next functional programming pattern we'll study is <em class="term">Either</em>.</p>
+    <p>As useful as <em>Option</em> is, sometimes we'd need a bit more info on exactly what went wrong when we end up with a None. In this regard, Option leaves us empty-handed. What if, instead of just None, we could get an error message, an exception object or some other piece of information detailing the problem?</p>
+    <p>This is where <em>Either</em> steps in to help us.</p>
     <p>Either[A, B] represents <em>either</em> a value of type A <em>or</em> of type B. <em>Either</em> has two concrete instance types, Left[A] and Right[B], whose type parameters correspond to the first and second type parameters of their static Either type, respectively.</p>
-    <p>Like Option, Either is typically used with computations that may or may not succeed, but Either provides extra information via Left.</p>
-    <p>When used to indicate whether a computation succeeded, Left usually represents failure, while Right represents success.</p>
+    <pre class="code">
+def overFourButNoMore(x: Int): Either[String, Int] =
+  if (x > 4) Right(5) else Left("C'mon, give me five!")
+    </pre>
+    <p>Like Option, Either is typically used with computations that may or may not succeed. Right usually wraps the success value, while Left wraps the failure value.</p>
+    <p>If we invoke function from the above snippet with a value less than five, we'll get a Left back &mdash; and that Left contains a message that will help us understand what went wrong.</p>
   </article>
   
   <article class="story emerald-right">
     <header class="topic topic-left">
       Folding and introspecting
     </header>
+    <p>Just like with Option, with Either, we don't initially know whether we actually have a Right or Left instance.</p>
+    <p>Again, to find out, we can use introspection. However, to get an actual, unwrapped value, we can't just use a <em>get</em>, since now we're dealing with <em>two</em> possible types. Giving a fallback value would not work either, for the same reason.</p>
+    <p>Instead, we have a new operation called <em>fold</em>, which takes two functions. The key is that the return type of both functions is unified. Only one of the functions is actually invoked, depending on whether the Either was a Left or a Right, and the return value of that function becomes the return value of <em>fold</em>.</p>
   </article>
   
   <article class="story peterriver-left">
     <header class="topic topic-right">
-      Projections and bias
+      Bias and projections
     </header>
+    <p>Either has something called <em>bias</em>. Bias determines which of the two sides of Either represents success by convention. As noted before, the usual case is that Right represents success, i.e. <em>right bias</em>.</p>
+    <p>Scala's standard library implementation of Either is <em>unbiased</em>. This means that Scala leaves that decision for the user, to be decided each time Either is used.</p>
+    <p>The desired biasing is indicated using one of the Either's <em>projection</em> methods, <em>left</em> and <em>right</em>. These are very different than the introspection methods, isLeft and isRight!</p>
+    <p>Just <em>why</em> we need projections will be clearer in the next section. For now, just take it on faith that we have projections because we don't have bias.</p>
   </article>
   
   <article class="story sunflower-right">
     <header class="topic topic-left">
       Composition of projections using map
     </header>
+    <p>Okay, so Either is like Option, except we get more information on the failure case. What about Option's party trick, composition? Can we compose computations with Either, and just write them as if they always succeeded, as with Option?</p>
+    <p>Either is just as capable is this regard. But with Scala, there's a catch &mdash; since Either is unbiased, we cannot use <em class="term">map</em> directly.</p>
+    <pre class="code">
+either.map(x => x + 1) // will not compile, map is not a method of Either
+    </pre>
+    <p>In a sense, this is intuitive. What would <span class="cmd">x</span> be in the above snippet? (If you are familiar with right biased Eithers, you'd know it is the value wrapped in Right, if our Either is a Right at all.)</p>
+    <p>Instead, we need to tell we want to operate on the right hand side, using a right projection.</p>
+    <p>With Option, our computation is only actually carried out if our instance was a Some. Here, the right projection makes Right analogous to Some for the operation. A left projection would make Left analogous to Some.</p>
+    <p>An example will help make sense of it all.</p>
+    <pre class="code">
+either.right.map(x => x + 1) // will compile, map is a method of the projection
+    </pre>
+    <p>Now, it's more clear what x is, since we're telling that we want to transform the right hand side. If our instance is a Left, it will remain unchanged, just like with None. If our instance is a Right, we'll increment its value by one.</p>
   </article>
   
   <article class="story turquoise-left">
     <header class="topic topic-right">
       Composition of projections using flatMap
     </header>
+    <p>For Option, composing computations that produced another Option was a special case. We used finding the fourth root of a number, via composing two square root computations, as an example. In a similar manner, for Either, composing Either-producing computations is a special case.</p>
+    <p>Once again, we turn to the special composition operator, <em class="term">flatMap</em>, also known as <em class="term">>>=</em> or <em class="term">bind</em>.</p>
+    <p>Let's take a different example this time. Consider a library that simplifies fetching content from a URL.</p>
+    <pre class="code">
+def slurp(url: String): String
+def connect(url: String): Connection
+def read(conn: Connection): String
+    </pre>
+    <p>Our client facing API consists of the <span class="cmd">slurp</span> function. To do its work, it will need to first <span class="cmd">connect</span> to a URL and then <span class="cmd">read</span> its contents. Both of these intermediate steps may fail &mdash; for example, the target host may not be listening or we may not be allowed to read its contents.</p>
+    <p>Armed with our knowledge gained from the "4th root" example, let's do a pass of refactoring on our API. Since our computations may fail independently and of various reasons, let's have our helper functions return Eithers. We'll model the failure as a simple error message, so we'll use String for the left hand side type.</p>
+    <pre class="code">
+def connect(url: String): Either[String, Connection]
+def read(conn: Connection): Either[String, String]
+    </pre>
+    <p>Since our slurp function will be built on top of these helpers, it makes sense that it too can fail.</p>
+    <pre class="code">
+def slurp(url: String): Either[String, String]
+    </pre>
+    <p>Specifically, we indicate in its type signature that it may or may not fail, but not succeed partially. However, should it fail, we want the <em>particular</em> error message that caused the composite operation to fail.</p>
+    <p>For our implementation of slurp, we'll use Right for success, as is usual &mdash; hence we'll need a right projection. We'll compose the helper functions using flatMap.</p>
   </article>
   
   <article class="story amethyst-right">
     <header class="topic topic-left">
       Composition of projections using for yield
     </header>
+    <p>As promised earlier, the <em>for yield</em> construct works for Either as well. Its use can significantly clean up our code when there are multiple flatMappings happening.</p>
+    <p>Using for yield for Either is very similar as for Option, but as with regular composition using map and flatMap, we must remember to use the appropriate projections. Recall that for yield is simply syntactic sugar.</p>
   </article>
   
   <article class="story carrot-left">
     <header class="topic topic-right">
       Joining nested projections
     </header>
+    <p>Sometimes we may end up in a situation where we have a value with a type like Either[A1, Either[A2, B]] or Either[Either[A, B1], B2]. Such a type could be used when we'd allow a computation to succeed partially.</p>
+    <p>Usually this case is avoided by using flatMap, but, just like with Option, there exists separate utilities for un-nesting the structure.</p>
+    <p>For Either, these operations are called <em class="term">joinRight</em> and <em class="term">joinLeft</em>, or, with biased Either, simply <em class="term">join</em>.</p>
+    <p>Unlike Option though, with Either we have two possible types on each nested level of the Either. This means not just any types are eligible for joining &mdash; rather, we require that for <em>joinRight</em>, A1 must be assignable from A2, and for <em>joinLeft</em>, B2 be assignable from B1.</p>
+    <p>The joined Either will have the static supertype on the side where there were two types in the nested structure.</p>
+    <pre class="code">
+val e: Either[Throwable, Either[Exception, Int]] = Right(Right(1))
+e.joinRight // scala.util.Either[Throwable,Int] = Right(1)
+    </pre>
   </article>
   
   <article class="story emerald-right">
     <header class="topic topic-left">
       Summary
     </header>
+    <p>Excellent!</p>
+    <p>We have added Either to our arsenal of functional patterns. Let's summarize the learnings.</p>
+    <ul>
+      <li><p><em class="term">Either</em> is similar to Option but provides more info on the failure case</p></li>
+      <li><p>Usually <em>Right</em> represents success while <em>Left</em> represents failure</p></li>
+      <li><p>Scala's Either implementation is <em>unbiased</em>, so we need projections</p></li>
+      <li>
+        <p>Either enables composition of computations</p>
+        <ul>
+          <li><p><em class="term">map</em> aka <em class="term">fmap</em> is used to compose "simple" computations</p></li>
+          <li><p><em class="term">flatMap</em> aka <em class="term">>>=</em> aka <em class="term">bind</em> is used to compose Option-producing computations</p></li>
+          <li><p><em class="term">joinRight</em> and less often <em class="term">joinLeft</em> (aka <em class="term">join</em> for <em>biased</em> implementations) can be used to flatten nested Eithers, with some constraints</p></li>
+        </ul>
+      </li>
+    </ul>
+    <p>Either can be chosen over Option when extra info is available for failures and when they may be useful for the user. Using Either is especially helpful when there may be multiple reasons for failures which are not evident from the context.</p>
+    <p>Take a moment now to bask in the glory of your enlightenment, and then you may proceed to meditate on <em class="term"><a href="lists.html">List</a></em>.</p>
   </article>
   
   <footer>

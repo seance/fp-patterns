@@ -1,4 +1,4 @@
-import foo.specs._
+import fpp.specs._
 
 class Options extends Meditation {
   
