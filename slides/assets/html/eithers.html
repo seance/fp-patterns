@@ -137,11 +137,12 @@ def slurp(url: String): Either[String, String]
     <div class="example" data-name="Slurping two good URLs with slurpConcat"></div>
     <div class="example" data-name="Slurping good and bad URL with slurpConcat"></div>
     <div class="example" data-name="Slurping bad and good URL with slurpConcat"></div>
+    <div class="example" data-name="Left gracefully short-circuits contextual composition"></div>
   </article>
   
   <article class="story carrot-left">
     <header class="topic topic-right">
-      Joining nested projections
+      Joining nested Eithers
     </header>
     <p>Sometimes we may end up in a situation where we have a value with a type like Either[A1, Either[A2, B]] or Either[Either[A, B1], B2]. Such a type could be used when we'd allow a computation to succeed partially.</p>
     <p>Usually this case is avoided by using flatMap, but, just like with Option, there exists separate utilities for un-nesting the structure.</p>
@@ -152,6 +153,20 @@ def slurp(url: String): Either[String, String]
 val e: Either[Throwable, Either[Exception, Int]] = Right(Right(1))
 e.joinRight // scala.util.Either[Throwable,Int] = Right(1)
     </pre>
+    <p>Although it might at first seem like it, joining isn't some demented mind game. If we consider that usually only right joins are used, it may seem more reasonable.</p>
+    <p>Again, we'll notice that map, flatMap, the joins and Either's Right and Left constructors have well-defined interdependencies.</p>
+    <pre class="code">
+either.right.map(f) === either.right.flatMap(x => Right(f(x)))
+either.left.map(f) === either.left.flatMap(x => Left(f(x)))
+either.joinRight === either.right.flatMap(identity)
+either.joinLeft === either.left.flatMap(identity)
+    </pre>
+    <div class="example" data-name="Joining right over Right gives the nested Either"></div>
+    <div class="example" data-name="Joining right just as above"></div>
+    <div class="example" data-name="Joining right over Left gives the wrapping Either"></div>
+    <div class="example" data-name="Joining left over Left gives the nested Either"></div>
+    <div class="example" data-name="Joining left just as above"></div>
+    <div class="example" data-name="Joinining left over Right gives the wrapping Either"></div>
   </article>
   
   <article class="story emerald-right">
@@ -174,6 +189,7 @@ e.joinRight // scala.util.Either[Throwable,Int] = Right(1)
       </li>
     </ul>
     <p>Either can be chosen over Option when extra info is available for failures and when they may be useful for the user. Using Either is especially helpful when there may be multiple reasons for failures which are not evident from the context.</p>
+    <p>Either compares favorably to throwing exceptions due to its ability to traverse threads &mdash; it is after all just a simple value, whereas an uncaught exception may kill its thread. There is also no stack jumping magic involved, unlike exceptions.</p>
     <p>Take a moment now to bask in the glory of your enlightenment, and then you may proceed to meditate on <em class="term"><a href="lists.html">List</a></em>.</p>
   </article>
   

@@ -187,5 +187,63 @@ class Eithers extends Meditation {
     "Slurping bad and good URL with slurpConcat" ! {
       slurpConcat("host3", "host8") must_== __
     }
+    
+    def banana = for {
+      x1 <- Right(1).right
+      x2 <- Left("BOOM").right
+      x3 <- Right(3).right
+    }
+    yield x3 
+    
+    "Left gracefully short-circuits contextual composition" ! {
+      banana must_== __
+    }
+  }
+  
+  "Joining nested Eithers" in {
+    
+    val ex = new Exception()
+    val e1: Either[Throwable, Either[Exception, Int]] = Right(Right(1))
+    val e2: Either[Throwable, Either[Exception, Int]] = Right(Left(ex))
+    val e3: Either[Throwable, Either[Exception, Int]] = Left(ex)
+    
+    class Super
+    class Sub extends Super
+    
+    val sub = new Sub
+    val e4: Either[Either[String, Sub], Super] = Right(sub)
+    val e5: Either[Either[String, Sub], Super] = Left(Right(sub))
+    val e6: Either[Either[String, Sub], Super] = Left(Left("Confused?"))
+    
+    val e7: Either[Exception, Either[Throwable, Int]] = Right(Right(1))
+    val e8: Either[String, Int] = Right(1)
+    
+    "Joining right over Right gives the nested Either" ! {
+      e1.joinRight must_== __
+    }
+    
+    "Joining right just as above" ! {
+      e2.joinRight must_== __
+    }
+    
+    "Joining right over Left gives the wrapping Either" ! {
+      e3.joinRight must_== __
+    }
+    
+    "Joining left over Left gives the nested Either" ! {
+      e4.joinLeft must_== __
+    }
+    
+    "Joining left just as above" ! {
+      e5.joinLeft must_== __
+    }
+    
+    "Joinining left over Right gives the wrapping Either" ! {
+      e6.joinLeft must_== __
+    }
+    
+    // Uncomment to get compile errors
+    // e7.joinRight // Exception is not assignable from Throwable
+    // e8.joinRight // No nesting, no joining
   }
 }
