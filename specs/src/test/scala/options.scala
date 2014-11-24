@@ -117,6 +117,17 @@ class Options extends Meditation {
       (sqrtSum(-1, 4) must_== __)
     }
     
+    def banana = for {
+      x1 <- Some(1)
+      x2 <- None
+      x3 <- Some(3)
+    }
+    yield x3
+    
+    "None gracefully short-circuits contextual composition" ! {
+      banana must_== __
+    }
+    
     def foo(x: Int) = Some(x+5)
       
     def bar(x: Int) = if (x > 6) Some(x-3) else None

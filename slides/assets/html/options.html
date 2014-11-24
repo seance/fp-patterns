@@ -147,6 +147,7 @@ gen1.flatMap(v1 => gen2.flatMap(v2 => ... genN.map(vN => expr)))
     <p>Notably, the last generator will be mapped over while all the previous ones are flatMapped over. This way, the <em>expr</em> does not need to return Option.</p>
     <div class="example" data-name="Sqrt can be neatly composed with itself using for yield"></div>
     <div class="example" data-name="All the intermediate results are in scope at yield"></div>
+    <div class="example" data-name="None gracefully short-circuits contextual composition"></div>
     <div class="example" data-name="Functions can be combined freely with Option composition"></div>
   </article>
   
@@ -188,6 +189,7 @@ option.flatten === option.flatMap(identity)
     <p>A well-crafted piece of software is typically broken in to a loosely coupled but highly cohesive set of units. How these pieces are used in combination, or composed, is therefore of interest. Functional composition offers a uniform, well defined way to do just that, when our units are functions.</p>
     <p>You may now take a moment to admire your virtuosity, and then proceed to meditate on <em class="term"><a href="eithers.html">Either</a></em>.</p>
   </article>
+  
   <footer>
     Functional Programming Patterns | Jukka Viinamäki | Futurice
   </footer>
