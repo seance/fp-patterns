@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>List, Option, Either Congruence</title>
+  <link rel="icon" href="../img/favicon.ico" type="image/x-icon">
+  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Raleway:600|Open+Sans:300,400|Source+Sans+Pro:300'>
+  <link rel="stylesheet" href="../css/slides.css">
+  <script src="../js/jquery.min.js"></script>
+  <script src="../js/ace.js"></script>
+  <script src="../js/theme-slides.js"></script>
+  <script src="../js/mode-scala.js"></script>
+  <script src="../js/slides.js"></script>
+</head>
+<body>
+
+<div class="container">
+  
+  <div class="connection"></div>
+
+  <h1>List, Option, Either Congruence</h1>
+  
+  <p class="note">
+    To get started, remember to run <span class="cmd">sbt</span> and then run
+    <span class="cmd">~test-only Leo</span> from the <span class="cmd">sbt</span>
+    console!
+  </p>
+  
+  <article class="story carrot-left">
+    <header class="topic topic-right">
+      Option and Either
+    </header>
+    <p>We've studied three patterns &mdash; List, Either and Option &mdash; in isolation to understand the essential concepts of each pattern. We've seen how each of these patterns, despite their differences, have fundamental similarities. Each of them wrap one or more values of parametric types, and provide compositionality via <em>map</em> and <em>flatMap</em>. Along with the particular type constructors and variations of <em>join</em>, these operations work together in a well established form.</p>
+    <p>Now, let's turn our focus on how these three patterns can work together for our benefit.</p>
+    <p>We'll begin with Option and Either.</p>
+    <p>In some circumstances, we might have modeled our computation using Either, for example as in the URL <span class="cmd">slurp</span> example. But then, what if some helper we are using has an Option signature? Since Either's flatMap requires Either, must we abandon compositionality?</p>
+    <p>No need for such drastic measures! As it turns out, Option can readily transform into Either, with a little assistance from us.</p>
+    <p>We, the programmer, are in the best position to interpret the meaning of a None result. Say for example, when reading from a connection, we'd first need to request a channel handle identified by a key. If the channel request resulted in a None, we might reasonably conclude that the channel identified by the key does not exist. Hence, to transform the Option into either, we'd need to specify for example that None, when encountered, would be replaced by <span class="cmd">Left("Channel for key does not exist")</span>, while <span class="cmd">Some(channel)</span> would readily transform to <span class="cmd">Right(channel)</span> without any further assistance.</p>
+    <p>In the opposite case, transforming an Either into an Option is even simpler. Now, we are simply discarding the information encapsulated in Left. This might be a reasonable thing to do, if we know that this information will not be useful. In other cases, we might want to reconsider whether we should model our computation with Either instead.</p>
+    <!-- Some/None toRight/toLeft; Left/Right left/right toOption -->
+    <div class="example" data-name="Option's toRight needs help with None"></div>
+    <div class="example" data-name="Option's toLeft is analogous but seldom needed"></div>
+    <div class="example" data-name="Either's right projection turns easily into Option"></div>
+    <div class="example" data-name="Either's left projection works similarly"></div>
+    <div class="example" data-name="Slurping with keyed channels"></div>
+  </article>
+  
+  <article class="story emerald-right">
+    <header class="topic topic-right">
+      Option and List
+    </header>
+    <p>Let's look at Option and List now.</p>
+    <p>Previously we introduced the <em>head</em> method of Lists &mdash; we noted, in particular, that on an empty list, invoking head would result in an exception. Lists provide us instead with an alternative, <em>headOption</em>, which returns an Option of the List's element type. This is in fact a common idiom found with many other types as well, including sets and maps, and serves as an example of how Option interacts with these types.</p>
+    <p>Working in the other direction, we may observe that Option is actually quite similar to a list that may or may not contain a single element. Some corresponds to a single-element list while None is similar to the empty list.</p>
+<!--
+case class Foo(name: String, bar: Option[Int])
+
+val foos: List[Foo] = ...
+val bar: Option[Int] = (for {
+  foo <- foos
+  bar <- foo.bar.toList
+}
+yield bar).reduceOption(_ max _)
+-->
+  </article>
+  
+  <article class="story peterriver-left">
+    <header class="topic topic-right">
+      List and Either
+    </header>
+    <p>Let's look next at how List and Either might fit together.</p>
+  </article>
+  <!--
+option to either
+either to option
+list to option (headOption)
+option to list
+list to either (nel)
+  -->
+    
+  <footer>
+    Functional Programming Patterns | Jukka Viinamäki | Futurice
+  </footer>
+</div>
+</body>
+</html>
