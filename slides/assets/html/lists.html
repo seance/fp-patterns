@@ -30,7 +30,7 @@
     <header class="topic topic-right">
       List basics
     </header>
-    <p>The next functional programming pattern is <em class="term">List</em>.</p>
+    <p>The next functional programming pattern we'll study is <em class="term">List</em>.</p>
     <p>We're all familiar with lists as sequential data structures that are ordered and may contain duplicates. However, sometimes in functional programming, List is interpreted as <em>nondeterminism</em>.</p>
     <p><em>Whaddidya just call me??</em></p>
     <p>No no, really, if you have ever written a backtracking search algorithm you're already familiar with nondeterminism. Understanding List as nondeterminism simply means that, when returned as a result from a computation, we take each  element of the list to mean a <em>potential</em> result of that computation. The list represents all the possible answers our computation might have.</p>
@@ -42,6 +42,7 @@ def diceRoll = 1 to 6
     <div class="example" data-name="Seq also works but gives static type Seq with List implementation"></div>
     <div class="example" data-name="Bounded ranges can be constructed using to"></div>
     <div class="example" data-name="And using until when we want a range with exclusive end"></div>
+    <div class="example" data-name="List.range works similarly as until"></div>
     <div class="example" data-name="Bounded ranges can also vary by different steps"></div>
   </article>
   
@@ -49,13 +50,13 @@ def diceRoll = 1 to 6
     <header class="topic topic-left">
       Reducing, folding and introspection
     </header>
+    <p>In Scala, <span class="cmd">List</span> is actually a particular implementation of the more generic abstraction, with for example <em>to</em> and <em>until</em> actually producing <span class="cmd">Range</span> instances. Our discussion will however focus on the abstraction itself.</p>
     <p>List offers a rich variety of useful utilities. In the convention we've established, let's see how we can get at the values wrapped in the list. When previously we've had to deal with multiple <em>types</em>, this time, our focus is on multiple <em>values</em>.</p>
-    <p>The first way we'll look at how to obtain a value from a list is the simplest &mdash; <em>head</em>. Head simply gives the first element, if it exists. If it doesn't, an exception is thrown.</p>
-    <p>Head's usual companion, <em>tail</em>, works as always, returning all elements except the head in a new list.</p>
-    <p>The first more complex operation is <em>reduce</em>. Reduce takes a list and an element-wise combination operator, and sequentially applies the operator to each element and the previous result, starting with the first element. Hence, reduce only works when the list is not empty.</p>
+    <p>The first way we'll look at how to obtain a value from a list is the simplest &mdash; <em>head</em>. Head simply gives the first element, if it exists. If it doesn't, an exception is thrown. Head's usual companion, <em>tail</em>, works as always, returning all elements except the head in a new list.</p>
+    <p>The first more complex operation is <em>reduceLeft</em>. It takes a list and an element-wise combination operator, and sequentially applies the operator to each element and the previous result, starting with the first element. Hence, reduceLeft only works when the list is not empty.</p>
     <pre class="code">
 trait List[A] {
-  def reduce(op: (A, A) => A): A // Simplified example
+  def reduceLeft(op: (A, A) => A): A // Simplified example
 }
     </pre>
     <p>The next operation is <em>foldLeft</em>. Folding is much like reducing, but instead of starting with the first element, it takes an initial element argument. This argument can be of different type than the list elements, as long as the combination operator has the same return type. This way, folding can produce an arbitrary result. Folding corresponds to what may be familiar as reduce from e.g. JavaScript utilities like Lo-Dash.</p>
@@ -64,8 +65,9 @@ trait List[A] {
   def foldLeft[B](init: B)(op: (B, A) => B): B // Simplified example
 }
     </pre>
-    <p>Scala actually defines <em>fold</em> and <em>foldRight</em> in addition to foldLeft. These are similar, but differ in traversal order and have potential implications for managing the call stack depth.</p>
-    <p>For introspection, we can for example find out the length of a list using the <em>size</em> operation. We can query whether a list contains a value using <em>contains</em>. For non-functional programming, list elements can be dereferenced using an index.</p>
+    <p>Scala actually defines <em>reduce</em>, <em>reduceRight</em>, <em>fold</em> and <em>foldRight</em> in addition to reduceLeft and foldLeft. These are similar, but differ in traversal order and have potential implications for managing the call stack depth.</p>
+    <p>For introspection, we can for example find out the length of a list using the <em>length</em> operation. We can query whether a list contains a value using <em>contains</em>. For non-functional programming, list elements can be dereferenced using an index.</p>
+    <p>While there are numerous other utilities available for Scala lists, they are not of particular interest for our purpose of studying List as a composable functional pattern.</p>
     <div class="example" data-name="Head is the first element of a list"></div>
     <div class="example" data-name="Tail is the list without head"></div>
     <div class="example" data-name="Appending to an immutable list via :+ produces a new list"></div>
@@ -90,14 +92,15 @@ trait List[A] {
     <header class="topic topic-left">
       Composition using flatMap
     </header>
-    <p>Let's look another example of mapping over a list. We want to construct a sequence of values: one, one two, one two three, etc.</p>
+    <p>Let's look at another example of mapping over a list. We want to construct a sequence of values: one, one two, one two three, etc.</p>
     <pre class="code">
 List(1, 2, 3).map(x => (1 to x).toList) // List(List(1), List(1, 2), List(1, 2, 3))
     </pre>
     <p>As we've seen before, the context (in this case List) of the value duplicates when our function returns a List. We end up with a tree-like structure instead of the plain list we wanted.</p>
     <p>As before, the solution to our duplication problem lies with <em class="term">flatMap</em>, also known as <em class="term">>>=</em> or <em class="term">bind</em>.</p>
-    <div class="example" data-name="The King's Knight can reach d4 in two moves"></div>
-    <div class="example" data-name="But the Queen's Knight cannot"></div>
+    <div class="example" data-name="Constructing a plain sequence with flatMap"></div>
+    <div class="example" data-name="The White King's Knight can reach d4 in two moves"></div>
+    <div class="example" data-name="But the White Queen's Knight cannot"></div>
   </article>
   
   <article class="story turquoise-left">
@@ -122,8 +125,8 @@ yield (x * 2).map(increment)
 }
 yield x * 2).map(increment)
     </pre>
-    <div class="example" data-name="The Queen's Knight can reach e3 in three moves"></div>
-    <div class="example" data-name="But the King's Knight cannot"></div>
+    <div class="example" data-name="The White Queen's Knight can reach e3 in three moves"></div>
+    <div class="example" data-name="But the White King's Knight cannot"></div>
     <div class="example" data-name="Nondeterministically, the empty list represents a dead end"></div>
   </article>
   
@@ -162,6 +165,7 @@ list.flatten === list.flatMap(identity)
       </li>
     </ul>
     <p>We have studied three functional programming patterns, each with their own flavor but also with striking similarities.</p>
+    <p>Our next chapter will study how the patterns we've learned about so far can act together in concert.</p>
     <p>You can now take a 2 minute break (no cheating!) and then proceed to <em class="term"><a href="leo.html">List, Either, Option Congruence</a></em></p>
   </article>
   

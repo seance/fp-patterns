@@ -19,6 +19,10 @@ class Lists extends Meditation {
     "And using until when we want a range with exclusive end" ! {
       (1 until 6) must_== __
     }
+      
+    "List.range works similarly as until" ! {
+      List.range(1, 3) must_== __
+    }
     
     "Bounded ranges can also vary by different steps" ! {
       (1.0 to 3.0 by 0.5) must_== __
@@ -115,7 +119,7 @@ class Lists extends Meditation {
     /**
      * Computes the chess board positions a Knight can move to from its current
      * position, given as list of integer tuples (column, row) with zero based
-     * indexes.
+     * indexing. Assumes an empty board.
      * 
      * Simulates nondeterminism by a backtracking search.
      */
@@ -148,10 +152,18 @@ class Lists extends Meditation {
       }
     }
     
+    /**
+     * Implicitly converts strings of the suitable format to (col, row) integer
+     * tuples.
+     */
     implicit def parsePosition(pos: String) = Position.parse(pos)
   }
   
   "Composition using flatMap" in {
+      
+    "Constructing a plain sequence with flatMap" ! {
+      List(1, 2, 3).__ must_== List(1, 1, 2, 1, 2, 3)
+    }
     
     import Chess._
     
@@ -162,11 +174,11 @@ class Lists extends Meditation {
      */
     def canKnightReachIn2(start: (Int, Int), end: (Int, Int)): Boolean = __
     
-    "The King's Knight can reach d4 in two moves" ! {
+    "The White King's Knight can reach d4 in two moves" ! {
       canKnightReachIn2("g1", "d4") must beTrue
     }
       
-    "But the Queen's Knight cannot" ! {
+    "But the White Queen's Knight cannot" ! {
       canKnightReachIn2("b1", "d4") must beFalse
     } 
   }
@@ -182,11 +194,11 @@ class Lists extends Meditation {
      */
     def canKnightReachIn3(start: (Int, Int), end: (Int, Int)): Boolean = __
     
-    "The Queen's Knight can reach e3 in three moves" ! {
+    "The White Queen's Knight can reach e3 in three moves" ! {
       canKnightReachIn3("b1", "e3") must beTrue
     }
       
-    "But the King's Knight cannot" ! {
+    "But the White King's Knight cannot" ! {
       canKnightReachIn3("g1", "e3") must beFalse
     }
     
