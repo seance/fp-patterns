@@ -79,6 +79,7 @@ def highFive(x: Int): Option[String] = if (x > 4) Some("High five!") else None
 val result = sqrt(value) // def sqrt(x: java.lang.Double): java.lang.Double
 if (result != null)
   increment(result)
+result
     </pre>
     <p>Instead, if sqrt was defined using Option, we could <em>compose</em> the computations using the <em class="term">map</em> composition operator, also known as <em class="term">fmap</em>:</p>
     <pre class="code">
