@@ -170,6 +170,7 @@ gen1.flatMap(v1 => gen2.flatMap(v2 => ... genN.map(vN => expr)))
     <pre class="code">
 option.map(f) === option.flatMap(x => Some(f(x)))
 option.flatten === option.flatMap(identity)
+option.flatMap(f) === option.map(f).flatten // f: Option[B]
     </pre>
     <div class="example" data-name="Nested Option instances can be un-nested using flatten"></div>
     <div class="example" data-name="Flatten specifically un-nests only a single layer"></div>

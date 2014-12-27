@@ -161,6 +161,8 @@ either.right.map(f) === either.right.flatMap(x => Right(f(x)))
 either.left.map(f) === either.left.flatMap(x => Left(f(x)))
 either.joinRight === either.right.flatMap(identity)
 either.joinLeft === either.left.flatMap(identity)
+either.right.flatMap(f) === either.right.map(f).joinRight // f: Either[A2, B], A1 >: A2
+either.left.flatMap(f) === either.left.map(f).joinLeft // f: Either[A, B2], B1 >: B2
     </pre>
     <div class="example" data-name="Joining right over Right gives the nested Either"></div>
     <div class="example" data-name="Joining right just as above"></div>

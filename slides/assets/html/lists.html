@@ -140,6 +140,7 @@ yield x * 2).map(increment)
     <pre class="code">
 list.map(f) === list.flatMap(x => List(f(x)))
 list.flatten === list.flatMap(identity)
+list.flatMap(f) === list.map(f).flatten // f: List[B]
     </pre>
     <div class="example" data-name="Nested lists can be un-nested using flatten"></div>
     <div class="example" data-name="Flattening un-nests specifically only one layer"></div>
