@@ -1,4 +1,4 @@
-package foo.slides
+package fpp.slides
 
 import akka.io._
 import akka.actor._

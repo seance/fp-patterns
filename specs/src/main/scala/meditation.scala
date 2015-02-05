@@ -9,7 +9,7 @@ class Meditation extends Specification {
   sequential
   stopOnFail
   
-  args.report(notifier = "foo.specs.AkkaNotifier")
+  args.report(notifier = "fpp.specs.AkkaNotifier")
   
   def __[A]: A = ???
     
