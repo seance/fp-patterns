@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Future</title>
+  <link rel="icon" href="../img/favicon.ico" type="image/x-icon">
+  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Raleway:600|Open+Sans:300,400|Source+Sans+Pro:300'>
+  <link rel="stylesheet" href="../css/slides.css">
+  <script src="../js/jquery.min.js"></script>
+  <script src="../js/ace.js"></script>
+  <script src="../js/theme-slides.js"></script>
+  <script src="../js/mode-scala.js"></script>
+  <script src="../js/slides.js"></script>
+</head>
+<body>
+
+<div class="container">
+  
+  <div class="connection"></div>
+
+  <h1>The Future Pattern</h1>
+  
+  <p class="note">
+    To get started, remember to run <span class="cmd">sbt</span> and then run
+    <span class="cmd">~test-only Futures</span> from the <span class="cmd">sbt</span>
+    console!
+  </p>
+  
+  <article class="story carrot-left">
+    <header class="topic topic-right">
+      Future basics
+    </header>
+    <p>The next pattern we'll study is Future.</p>
+    <p>“Thenables” are a concept which has been recently popularized in the JavaScript world via the Promises/A+ specification, with libraries like Bluebird gaining recognition.</p>
+    <p>Futures in Scala are a similar concept, but as we'll soon discover, they conform to the more general pattern of compositionality we have studied in this tutorial.</p>
+    <p>Essentially, Future represents an <em>eventual</em> value, available sometime in the future. Having a handle to the eventual value, we can codify ahead of time a kind of pipeline of transformations we wish to perform on the value once it is available. Importantly, these computations can then be whisked off into another thread without blocking the current one.</p>
+    <div class="example" data-name="Token Futures can be built via Future.successful"></div>
+    <div class="example" data-name="Future() dispatches a new task in an execution context"></div>
+  </article>
+  
+  <article class="story emerald-right">
+    <header class="topic topic-left">
+      Introspection, blocking and callbacks
+    </header>
+    <p>Once again, let's first see how an eventual value in a Future context can be introspected and unwrapped.</p>
+    <p>A value of type Future[A] is either completed or not completed. Once completed, it may have successfully completed or it may have failed. Scala's Future provides <em>isCompleted</em> and <em>value</em> methods, which are both non-blocking and return immediately. The Future's value is an Option[Try[A]] &mdash; None while incomplete &mdash; with concrete Try[A] instances Success[A] and Failure. A Failure always contains a Throwable instance here.</p>
+    <p>Callbacks can be attached to either successful or unsuccessful completion, or both, via <em>onSuccess</em>, <em>onFailure</em> and <em>onComplete</em>. Multiple callbacks can be registered, and they may execute immediately or asynchronously, without any guarantee of ordering.</p>
+    <p>Finally, a Future <em>f</em> can be blockingly waited on via <em>Await.ready(f)</em> or <em>Await.result(f)</em>. The former returns the Future itself after it is completed, while the latter simply returns its value &mdash; or, throws the exception that had caused the Future to fail, if that is the case.</p>
+  </article>
+  
+  <article class="story peterriver-left">
+    <header class="topic topic-right">
+      Composition using map
+    </header>
+    <p>While Future's blocking usage is important to know, and callbacks can be useful, Future's true usefulness is revealed through its <em>compositionality</em>, or forming that pipeline of transformations.</p>
+    <p>Future's transformations are composed via <em class="term">map</em>, also known as <em class="term">fmap</em>.</p>
+    <p>Let's consider for example a library that queries a JSON API for weather data &mdash; specifically, for the current temperature in a given city. A query to the API could be implemented as a blocking HTTP request, but our library's ability to scale might suffer as a result. Let's instead plan ahead and specify that our library returns Futures instead, and somehow schedules the execution of those Futures efficiently behind the scenes.</p>
+    <p>But, since the API will return larger lumps of JSON data for each query, how can we extract just the temperature data for our library users, while at the same time returning a handle to the data before we even have it?</p>
+    <p>In other words, how to go from this...</p>
+    <pre class="code">
+def getTemperature(city: String): Future[String] // Raw JSON string with all kinds of data
+    </pre>
+    <p>...to this?</p>
+    <pre class="code">
+def getTemperature(city: String): Future[Double] // Current temperature, in &deg;C, of the city
+    </pre>
+    <p>The solution to this seemingly insurmountable problem lies of course with composition.</p>
+  </article>
+  
+  <article class="story sunflower-right">
+    <header class="topic topic-left">
+      Composition using flatMap and for yield
+    </header>
+    <p>Let's take our temperature library to the next level. Say we are planning a holiday in one of two competing cities, but since we like warm, we want to always choose the warmer destination. Our library should be able to take two city names and return the  warmer of the two along with its temperature.</p>
+<!--  Composing value with Future.successful  -->
+  </article>
+  
+  <article class="story turquoise-left">
+    <header class="topic topic-right">
+      Future and Either
+    </header>
+    <p>We've seen how the default Scala Future contains a Try[A] instance, a type seemingly very similar with Either. However, as it is <em>not</em> an Either, it remains separate and cannot be cross-composed with Either.</p>
+    <p></p>
+  </article>
+
+  <footer>
+    Functional Programming Patterns | Jukka Viinamäki | Futurice
+  </footer>
+</div>
+</body>
+</html>

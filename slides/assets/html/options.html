@@ -31,14 +31,23 @@
       Option basics
     </header>
     <p>The first functional programming pattern we'll look at is <em class="term">Option</em>, also known as <em class="term">Maybe</em>.</p>
+    <p>Before we discuss Option, let's take a quick detour to null.</p>
     <p>We're all familiar with methods that return null when no other thing makes sense. Some methods take optional parameters represented by null.</p>
-    <p>In both cases, our code will be riddled with null check <span class="cmd">if</span>s, making it verbose, and obscuring the main flow of logic. And should you forget a check, you're setting up for a null pointer exception, potentially killing your thread. <em>Sigh</em>. If only there was a better way.</p>
-    <p>There is!</p>
-    <p>Option[A] represents a <em>possible</em> value of type A. Option has two concrete instance types, Some[A] and None. Some wraps a value, while None is used when there is no value.</p>
+    <pre class="code">
+def foo(bar: String) = {
+  if (bar == null)
+    return null
+    
+  ...
+}
+    </pre>
+    <p>In both cases, our code will be riddled with null check <span class="cmd">if</span>s, making it verbose, and obscuring the main flow of logic. And should you forget a check, you're setting up for a null pointer exception, potentially killing your thread.</p>
+    <p><em>Sigh</em>. If only there was a better way.</p>
+    <p>There is! Option[A] represents a <em>possible</em> value of type A. Option has two concrete instance types, Some[A] and None. Some wraps a value, while None is used when there is no value.</p>
     <pre class="code">
 def highFive(x: Int): Option[String] = if (x > 4) Some("High five!") else None    
     </pre>
-    
+    <p>You'll notice we still have an if in this code. We'll discover Option's true benefits in a moment, but let's take a look what we gain on the surface level.</p>
     <p>Option, by grace of its static type, harnesses the compiler to remind us that the value may be missing. Further, while null is not a proper value &mdash; any invocations causing NPEs &mdash; None is, and it fulfills the Option contract.</p>
     <div class="example" data-name="Some wraps a value"></div>
     <div class="example" data-name="None represents a missing value"></div>
@@ -70,6 +79,7 @@ def highFive(x: Int): Option[String] = if (x > 4) Some("High five!") else None
 val result = sqrt(value) // def sqrt(x: java.lang.Double): java.lang.Double
 if (result != null)
   increment(result)
+result
     </pre>
     <p>Instead, if sqrt was defined using Option, we could <em>compose</em> the computations using the <em class="term">map</em> composition operator, also known as <em class="term">fmap</em>:</p>
     <pre class="code">
@@ -161,6 +171,7 @@ gen1.flatMap(v1 => gen2.flatMap(v2 => ... genN.map(vN => expr)))
     <pre class="code">
 option.map(f) === option.flatMap(x => Some(f(x)))
 option.flatten === option.flatMap(identity)
+option.flatMap(f) === option.map(f).flatten // f: Option[B]
     </pre>
     <div class="example" data-name="Nested Option instances can be un-nested using flatten"></div>
     <div class="example" data-name="Flatten specifically un-nests only a single layer"></div>
