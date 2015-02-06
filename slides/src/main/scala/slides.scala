@@ -27,7 +27,7 @@ class HttpSlides extends Actor with HttpService {
   def actorRefFactory = context
   def receive = runRoute {
     pathPrefix("assets") {
-      getFromDirectory("assets")
+      getFromDirectory("slides/assets")
     } ~
     pathEndOrSingleSlash {
       redirect("/assets/html/index.html", StatusCodes.Found)
