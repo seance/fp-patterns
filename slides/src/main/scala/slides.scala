@@ -30,7 +30,7 @@ class HttpSlides extends Actor with HttpService {
       getFromDirectory("assets")
     } ~
     pathEndOrSingleSlash {
-      redirect("/assets/html/index.html", StatusCodes.PermanentRedirect)
+      redirect("/assets/html/index.html", StatusCodes.Found)
     }
   }
 }
