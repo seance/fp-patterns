@@ -53,7 +53,7 @@ execRunner () {
 
   # THis used to be exec, but we loose the ability to re-hook stty then
   # for cygwin...  Maybe we should flag the feature here...
-  "$@"
+  exec "$@"
 }
 
 addJava () {

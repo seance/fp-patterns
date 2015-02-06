@@ -1,0 +1,6 @@
+./sbt/bin/sbt "project slides" "run" &
+SLIDES_PID=$!
+echo "Slides PID $SLIDES_PID"
+./sbt/bin/sbt "project specs" "~test-only $1"
+kill $SLIDES_PID
+
