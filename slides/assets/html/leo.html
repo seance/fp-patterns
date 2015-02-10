@@ -53,16 +53,6 @@
     <p>Previously we introduced the <em>head</em> method of Lists &mdash; we noted, in particular, that on an empty list, invoking head would result in an exception. Lists provide us instead with an alternative, <em>headOption</em>, which returns an Option of the List's element type. This is in fact a common idiom found with many other types as well, including sets and maps, and serves as an example of how Option interacts with these types.</p>
     <p>Working in the other direction, we may observe that Option is actually quite similar to a list that may or may not contain a single element. Some corresponds to a single-element list while None is similar to the empty list.</p>
     <p>Related to this insight, there exists a particular concept in functional programming called NonEmptyList. A NonEmptyList is just that, a list that can guarantee via its static type that it is not empty, i.e. it has at least one element. An implementation for Scala is found for example in Scalaz, a highly literate functional programming library.</p>
-<!--
-case class Foo(name: String, bar: Option[Int])
-
-val foos: List[Foo] = ...
-val bar: Option[Int] = (for {
-  foo <- foos
-  bar <- foo.bar.toList
-}
-yield bar).reduceOption(_ max _)
--->
   </article>
   
   <article class="story peterriver-left">

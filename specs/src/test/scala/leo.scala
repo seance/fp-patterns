@@ -125,10 +125,22 @@ class Leo extends Meditation {
     def min = (_: Int) min (_: Int)
     def mod = (_: Int) % (_: Int)
       
-    "Option and List working together in perfect harmony" ! {
-      (someSum(xs3) must_== Some(24)) and
-      (someSum(xs4) must_== None) and
-      (someSum(xs5) must_== None)
+    "Some summing with Option and List" ! {
+      (someSum(xs3) must_== __) and
+      (someSum(xs4) must_== __) and
+      (someSum(xs5) must_== __)
+    }
+    
+    "Some maxing with Option and List" ! {
+      (someMax(xs3) must_== __) and
+      (someMax(xs4) must_== __) and
+      (someMax(xs5) must_== __)
+    }
+    
+    "Some HOFing with Option and List" ! {
+      (someOp(xs3, min) must_== __) and
+      (someOp(xs3, mod) must_== __) and
+      (someOp(xs5, mod) must_== __)
     }
   }
 }
