@@ -18,4 +18,6 @@ You'll need Java and Git. Clone the repo.
 
 * In the specification (found in specs/src/test/scala), replace the placeholder symbols (`__`) with code that completes the example. As you complete examples, the web page will give you feedback in real time, and reveal more content for reading.
 
+* When you complete a tutorial (like Options), terminate the `meditate` process running in the console simply by pressing enter. To start with the next tutorial, run the corresponding `meditate` command.
+
 Note that compile errors in the specification will not be relayed to the web page. Keep an eye on the console window where you run the specs. If there are compile errors, use the compiler's error messages to help you fix them as usual.
