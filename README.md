@@ -12,7 +12,7 @@ You'll need Java and Git. Clone the repo.
 
 * Make sure that the ports 8000, 2552 and 2553 are available.
 
-* Run `meditate <spec>` (use `meditate.bat` on Windows) from the command line at the root of the repo. Here `<spec>` is the class name of a specification, for example `Options`.
+* Run `./meditate <spec>` (use `meditate.bat` on Windows) from the command line at the root of the repo. Here `<spec>` is the class name of a specification, for example `Options`.
 
 * Open your browser to localhost:8000, and select the tutorial matching the specification for your meditate command.
 
