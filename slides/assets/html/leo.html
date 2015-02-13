@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>List, Option, Either Congruence</title>
+  <title>List, Either, Option Congruence</title>
   <link rel="icon" href="../img/favicon.ico" type="image/x-icon">
   <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Raleway:600|Open+Sans:300,400|Source+Sans+Pro:300'>
   <link rel="stylesheet" href="../css/slides.css">
@@ -18,7 +18,7 @@
   
   <div class="connection"></div>
 
-  <h1>List, Option, Either Congruence</h1>
+  <h1>List, Either, Option Congruence</h1>
   
   <p class="note">
     To get started, remember to run <span class="cmd">sbt</span> and then run
@@ -37,7 +37,6 @@
     <p>No need for such drastic measures! As it turns out, Option can readily transform into Either, with a little assistance from us.</p>
     <p>We, the programmer, are in the best position to interpret the meaning of a None result. Say, for example, when reading from a connection, we'd first need to request a channel handle identified by a key. If the channel request resulted in a None, we might reasonably conclude that the channel identified by the key does not exist. Hence, to transform the Option into Either, we'd need to specify for example that None, when encountered, would be replaced by <span class="cmd">Left("Channel for key does not exist")</span>, while <span class="cmd">Some(channel)</span> would readily transform to <span class="cmd">Right(channel)</span> without any further assistance.</p>
     <p>In the opposite case, transforming an Either into an Option is even simpler. Now, we are simply discarding the information encapsulated in Left. This might be a reasonable thing to do, if we know that this information will not be useful. In other cases, we might want to reconsider whether we should model our computation with Either instead.</p>
-    <!-- Some/None toRight/toLeft; Left/Right left/right toOption -->
     <div class="example" data-name="Option's toRight needs help with None"></div>
     <div class="example" data-name="Option's toLeft is analogous but seldom needed"></div>
     <div class="example" data-name="Either's right projection turns easily into Option"></div>
@@ -53,6 +52,11 @@
     <p>Previously we introduced the <em>head</em> method of Lists &mdash; we noted, in particular, that on an empty list, invoking head would result in an exception. Lists provide us instead with an alternative, <em>headOption</em>, which returns an Option of the List's element type. This is in fact a common idiom found with many other types as well, including sets and maps, and serves as an example of how Option interacts with these types.</p>
     <p>Working in the other direction, we may observe that Option is actually quite similar to a list that may or may not contain a single element. Some corresponds to a single-element list while None is similar to the empty list.</p>
     <p>Related to this insight, there exists a particular concept in functional programming called NonEmptyList. A NonEmptyList is just that, a list that can guarantee via its static type that it is not empty, i.e. it has at least one element. An implementation for Scala is found for example in Scalaz, a highly literate functional programming library.</p>
+    <div class="example" data-name="Maybe getting Some head"></div>
+    <div class="example" data-name="Option is like one-element or empty list"></div>
+    <div class="example" data-name="Some summing with Option and List"></div>
+    <div class="example" data-name="Some maxing with Option and List"></div>
+    <div class="example" data-name="Some HOFing with Option and List"></div>
   </article>
   
   <article class="story peterriver-left">
@@ -60,15 +64,14 @@
       List and Either
     </header>
     <p>Let's look next at how List and Either might fit together.</p>
+    <p>Here the NonEmptyList concept introduced in the previous section is again useful. Say for example, we have a program that takes as input a list of values &mdash; like files to process or URLs to scan. For the program to do something, the input list must contain at least one item.</p>
+    <p>Since we already know how to make an Option[NonEmptyList[A]], and we know how to transform Option into Either, we can easily combine these operations to produce meaningful errors for our users.</p>
+    <div class="example" data-name="Sum of mandatory items with non-empty list succeeds"></div>
+    <div class="example" data-name="Sum of mandatory items with empty list fails"></div>
+    <div class="example" data-name="Sum of optional items with non-empty list succeeds"></div>
+    <div class="example" data-name="Sum of optional items with empty list produces zero"></div>
   </article>
-  <!--
-option to either
-either to option
-list to option (headOption)
-option to list
-list to either (nel)
-  -->
-    
+ 
   <footer>
     Functional Programming Patterns | Jukka Viinamäki | Futurice
   </footer>
