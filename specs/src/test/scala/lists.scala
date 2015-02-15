@@ -31,7 +31,7 @@ class Lists extends Meditation {
   
   "Reducing, folding and introspection" in {
     
-    val xs1: List[Int] = List.range(1, 3)
+    val xs1: List[Int] = List.range(1, 4)
     val xs2: List[Int] = List()
     
     "Head is the first element of a list" ! {
