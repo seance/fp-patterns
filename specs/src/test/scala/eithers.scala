@@ -35,11 +35,11 @@ class Eithers extends Meditation {
     val e2: Either[String, Int] = Left("Fail")
     
     "Use the 'right' method to get a Right projection" ! {
-      e1.__ must be (anInstanceOf[Either.RightProjection[String, Int]])
+      e1.__ must beAnInstanceOf[Either.RightProjection[String, Int]]
     }
     
     "Left projection is seldom needed in practise" ! {
-      e1.__ must be (anInstanceOf[Either.LeftProjection[String, Int]])
+      e1.__ must beAnInstanceOf[Either.LeftProjection[String, Int]]
     }
   }
   
