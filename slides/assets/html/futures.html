@@ -21,9 +21,7 @@
   <h1>The Future Pattern</h1>
   
   <p class="note">
-    To get started, remember to run <span class="cmd">sbt</span> and then run
-    <span class="cmd">~test-only Futures</span> from the <span class="cmd">sbt</span>
-    console!
+    To get started, remember to run <span class="cmd">./meditate Futures</span>!
   </p>
   
   <article class="story carrot-left">
@@ -72,7 +70,11 @@ def getTemperature(city: String): Future[Double] // Current temperature, in &deg
       Composition using flatMap and for yield
     </header>
     <p>Let's take our temperature library to the next level. Say we are planning a holiday in one of two competing cities, but since we like warm, we want to always choose the warmer destination. Our library should be able to take two city names and return the  warmer of the two along with its temperature.</p>
+    <p>Future.sequence</p>
+    <p>Scalaz sequence/sequenceU</p>
+    <p>Arbitrary number of cities: sequence, List tie-in</p>
 <!--  Composing value with Future.successful  -->
+<!--  Future.sequence List[Future[Either[A, B]]] => Future[Either[A, List[B]]]-->
   </article>
   
   <article class="story turquoise-left">

@@ -3,9 +3,7 @@ import fpp.specs._
 class Leo extends Meditation {
   
   "Option and Either" in {
-    
-     "" ! (List[Int]().sum must_== 0)
-    
+
     val o1: Option[Int] = Some(3)
     val o2: Option[Int] = None
       
@@ -141,6 +139,46 @@ class Leo extends Meditation {
       (someOp(xs3, min) must_== __) and
       (someOp(xs3, mod) must_== __) and
       (someOp(xs5, mod) must_== __)
+    }
+  }
+  
+  "List and Either" in {
+    
+    val xs1: List[Int] = List(1, 2, 3)
+    val xs2: List[Int] = List()
+      
+    import scalaz.syntax.std.list._
+      
+    def noItems = "No items"
+      
+    /**
+     * Sum items, if any. Otherwise, produce Left using the noItems helper
+     * function. Use toNel and Option to Either conversion.
+     */
+    def sumMandatoryItems(xs: List[Int]): Either[String, Int] = __
+    
+    /**
+     * This function retains the same signature as the above function.
+     * However, this time an empty argument list should result in a
+     * Right containing zero sum. Hint - any value can be made into a
+     * NonEmptyList using the implicit wrapNel method.
+     */
+    def sumOptionalItems(xs: List[Int]): Either[String, Int] = __
+      
+    "Sum of mandatory items with non-empty list succeeds" ! {
+      sumMandatoryItems(xs1) must_== Right(6)
+    }
+    
+    "Sum of mandatory items with empty list fails" ! {
+      sumMandatoryItems(xs2) must_== __
+    }
+    
+    "Sum of optional items with non-empty list succeeds" ! {
+      sumOptionalItems(xs1) must_== Right(6)
+    }
+    
+    "Sum of optional items with empty list produces zero" ! {
+      sumOptionalItems(xs2) must_== Right(0)
     }
   }
 }
