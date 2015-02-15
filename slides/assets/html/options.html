@@ -148,7 +148,7 @@ for {
 }
 yield expr
     </pre>
-    <p>The forms are equivalent, with the latter more suitable when there several <span class="cmd">&lt;-</span> expressions. These expressions are known as generators. For Option, these must be values or computations that produce Option.</p>
+    <p>The forms are equivalent, with the latter more suitable when there are several <span class="cmd">&lt;-</span> expressions. These expressions are known as generators. For Option, these must be values or computations that produce Option.</p>
     <p>The whole <em>for yield</em> construct itself is an expression, producing a value of type Option[A] where A is the type of <em>expr</em>, when the generators produce Option. The first generator defines the context of the for comprehension, in this case Option.</p>
     <p>It's good to know that the <em>for yield</em> construct is merely syntactic sugaring for <em>map</em> and <em>flatMap</em>. The above construct is rewritten by the compiler to the following form:</p>
     <pre class="code">
