@@ -124,21 +124,21 @@ class Leo extends Meditation {
     def mod = (_: Int) % (_: Int)
       
     "Some summing with Option and List" ! {
-      (someSum(xs3) must_== __) and
-      (someSum(xs4) must_== __) and
-      (someSum(xs5) must_== __)
+      (someSum(xs3) must_== Some(24)) and
+      (someSum(xs4) must_== None) and
+      (someSum(xs5) must_== None)
     }
     
     "Some maxing with Option and List" ! {
-      (someMax(xs3) must_== __) and
-      (someMax(xs4) must_== __) and
-      (someMax(xs5) must_== __)
+      (someMax(xs3) must_== Some(9)) and
+      (someMax(xs4) must_== None) and
+      (someMax(xs5) must_== None)
     }
     
     "Some HOFing with Option and List" ! {
-      (someOp(xs3, min) must_== __) and
-      (someOp(xs3, mod) must_== __) and
-      (someOp(xs5, mod) must_== __)
+      (someOp(xs3, min) must_== Some(3)) and
+      (someOp(xs3, mod) must_== Some(1)) and
+      (someOp(xs5, mod) must_== None)
     }
   }
   
@@ -170,7 +170,7 @@ class Leo extends Meditation {
     }
     
     "Sum of mandatory items with empty list fails" ! {
-      sumMandatoryItems(xs2) must_== __
+      sumMandatoryItems(xs2) must_== Left("No items")
     }
     
     "Sum of optional items with non-empty list succeeds" ! {
