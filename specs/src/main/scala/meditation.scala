@@ -2,9 +2,10 @@ package fpp.specs
 
 import org.specs2.mutable._
 import org.specs2.reporter._
+import org.specs2.time._
 import akka.actor._
 
-class Meditation extends Specification {
+class Meditation extends Specification with NoTimeConversions {
   
   sequential
   stopOnFail

@@ -69,7 +69,30 @@ def getTemperature(city: String): Future[Double] // Current temperature, in &deg
     <header class="topic topic-left">
       Composition using flatMap and for yield
     </header>
-    <p>Let's take our temperature library to the next level. Say we are planning a holiday in one of two competing cities, but since we like warm, we want to always choose the warmer destination. Our library should be able to take two city names and return the  warmer of the two along with its temperature.</p>
+    <p>Let's take our temperature library to the next level. Say we are planning a holiday in one of two competing cities, but since we like warm, we want to always choose the warmer destination. Our library should be able to take two city names and return the  warmer of the two along with its temperature in a tuple.</p>
+    <p>The final iteration of the temperature library should then take a list of city names and select the warmest, returning its name and temperature.</p>
+    <p>Futures differ from the previous patterns the way that they deal with a new concern from the real world &mdash; time. This fact creates a special consideration for flatMap. With flatMap, we know we'll be dealing with another future. With Scala's futures, the newly created Future starts running right away in a background thread (pooled from an <em>ExecutionContext</em> behind the scenes). This means that futures joined in the following construct...</p>
+    <pre class="code">
+for {
+  v1 <- createFuture1
+  v2 <- createFuture2
+}
+yield ...
+    </pre>
+    <p>...execute <em>sequentially</em>. We recall that <em>for yield</em> is simply sugaring for flatMap and map. The flatMapped function, rewritten from the second generator, cannot be run before the value <span class="cmd">v1</span> is available. Hence, the second Future will only start running once the first one has completed.</p>
+    <p>If the futures are in fact independently created (we don't need <span class="cmd">v1</span> to kick off the second future), we'd rather that the futures run in parallel.</p>
+    <p>To achieve this, we must create both the futures before the for yield expression.</p>
+    <pre class="code">
+val f1 = createFuture1
+val f2 = createFuture2
+
+for {
+  v1 <- f1
+  v2 <- f2
+}
+yield ...
+    </pre>
+    <p>Now, clearly, the futures are created first and will execute in parallel. As in the previous example, the result of the for yield expression is a Future that will complete when both of the joined futures have completed.</p>
     <p>Future.sequence</p>
     <p>Scalaz sequence/sequenceU</p>
     <p>Arbitrary number of cities: sequence, List tie-in</p>
