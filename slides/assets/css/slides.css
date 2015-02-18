@@ -74,6 +74,10 @@ em.term {
   opacity: 0.1;
 }
 
+.muted {
+  color: #7f8c8d;
+}
+
 .note {
   text-align: center;
   font-style: italic;

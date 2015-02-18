@@ -104,8 +104,57 @@ yield ...
     <header class="topic topic-right">
       Future and Either
     </header>
-    <p>We've seen how the default Scala Future contains a Try[A] instance, a type seemingly very similar with Either. However, as it is <em>not</em> an Either, it remains separate and cannot be cross-composed with Either.</p>
-    <p></p>
+    <p>We've seen how the default Scala Future contains a Try[A] instance, a type seemingly very similar to Either. However, as it is <em>not</em> an Either, it remains separate and cannot be cross-composed with Either.</p>
+    <p>We won't study this type further, except to notice that we can just ignore it in favor of Either. The HTTP library we have used, Dispatch, provides a convenience method which instructs its response handlers to catch any exceptions which would have caused the future to fail, and wrap them in a Left. Successful result gets wrapped in Right. Hence, the future always succeeds, but now contains an Either. This is good for us, since now we can compose our validation etc failures into the single type.</p>
+    <p>How would we go about doing this though? Let's see how this would work with our city temperature library.</p>
+    <p>First we need to refactor the library to use the Either conversion. Then, we'll add some validation logic for the result. Since the real weather service will likely not return many errors, we'll have to fake some.</p>
+    <p>The service calls will take the following form:</p>
+    <pre class="code">
+def getData(...): Future[Either[Throwable, JsValue]]
+    </pre>
+    <p>Our parse/validation function(s) will take the following form:</p>
+    <pre class="code">
+def parseSomething(js: JsValue): Either[Throwable, Something]
+    </pre>
+    <p>Then, we'd like to compose the computations as follows:</p>
+    <pre class="code">
+getData(...).flatMap(parseSomething)
+    </pre>
+    <p>Hmm. Something seems to be a bit amiss. The service call's Either is wrapped in a Future, while the parse/validation function's result isn't. These values cannot be directly composed.</p>
+    <p>Looks like we have two options &mdash; lift the parse/validation code to Future, for example using Future.successful, or, use a normal map and then reach into the resulting Future (now containing a nested Either) with another map and flatten the inner structure using Either's joinRight.</p>
+    <p>Both methods are simpler than what they sound like, and will do fine for now. But, let's make a mental note of this little kink. We'll be revisiting this issue later.</p>
+  </article>
+  
+  <article class="story amethyst-right">
+    <header class="topic topic-right">
+      Summary
+    </header>
+    <p>Excellent!</p>
+    <p>We have expanded our knowledge to include Future, an important tool for managing asynchronous computations and parallelism.</p>
+    <p>Let's briefly summarize the learnings:</p>
+    <ul>
+      <li><p>Future[A] represents an eventually available value of type A</p></li>
+      <li><p>Futures manage asynchronous computations often better than callbacks</p></li>
+      <li><p>Future brings a new aspect of the real world on the table &mdash; time</p></li>
+      <li>
+        <p>Either enables composition of computations</p>
+        <ul>
+          <li><p><em class="term">map</em> aka <em class="term">fmap</em> is used to compose "simple" computations</p></li>
+          <li><p><em class="term">flatMap</em> aka <em class="term">>>=</em> aka <em class="term">bind</em> is used to compose Future-producing computations</p></li>
+          <li><p><em class="term">flatten</em> can be used to flatten nested Futures</p></li>
+        </ul>
+      </li>
+      <li>
+        <p>Dispatch's Either helper can be used to combine the Future and Either patterns</p>
+        <ul>
+          <li><p>Combining patterns in this way is different than what we've seen before with the LEO types, and is a topic of study in itself</p></li>
+        </ul>
+      </li>
+    </ul>
+    <p>This concludes the first part of the Functional Programming Patterns tutorial. In this first installment, we've studied individual patterns and discovered how they can be used in concert, as well as discovered how they naturally mesh in the Scala standard library and some functionally oriented third party libraries.</p>
+    <p>While there are many more useful patterns, the ones introduced in this part set a good foundation for understanding what these patterns are all about, and are easily applicable to most programs because of the ubiquity of the problems they help solve.</p>
+    <p>The next part will study the underpinnings of what exactly brings these patterns together and how they are formed.</p>
+    <p>Let's take the leap to the next section, <a href="the-m-word.html">The 'M' word</a>!</p>
   </article>
 
   <footer>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>The 'M' Word</title>
+  <link rel="icon" href="../img/favicon.ico" type="image/x-icon">
+  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Raleway:600|Open+Sans:300,400|Source+Sans+Pro:300'>
+  <link rel="stylesheet" href="../css/slides.css">
+  <script src="../js/jquery.min.js"></script>
+  <script src="../js/ace.js"></script>
+  <script src="../js/theme-slides.js"></script>
+  <script src="../js/mode-scala.js"></script>
+  <script src="../js/slides.js"></script>
+</head>
+<body>
+
+<div class="container">
+  
+  <div class="connection"></div>
+
+  <h1>The 'M' Word</h1>
+  
+  <p class="note">
+    To get started, remember to run <span class="cmd">./meditate Monads</span>!
+  </p>
+  
+  <article class="story carrot-left">
+    <header class="topic topic-right">
+      Functors, Applicatives, Monads
+    </header>
+    <p>The most astute readers may have already discovered that all the patterns studied in the first part of this tutorial are, in fact, monads. Yes, the "M" word, which is often enough to make experienced programmers scoff at the perceived pinnacle of useless purism of the ivory tower that is functional programming.</p>
+    <p>This connection was not highlighted to encourage a more open mind to exploring alternative ways of reasoning about our programs. Now that the cat is out of the bag, though, we might as well take a better look!</p>
+    <p>We already know on a practical level almost all there is to know about monads. What we might not yet know is that there exists a whole taxonomy of related concepts which stem from the field of mathematics known as Category Theory. How and at what granularity these concepts are realized is a concern of each particular implementation, but a few core concepts stand out.</p>
+    <p>The most fundamental concept is the <em class="term">Functor</em>. Whenever we <em class="term">map</em> (aka <em class="term">fmap</em>) over a context, we're using that context as a Functor. In other words, Functor provides the semantics for the <em>map</em> operation. Now we know where the 'f' comes from in <em>fmap</em>!</p>
+    <pre class="code">
+trait Functor[F[_]] {
+  def map[A, B](fa: F[A])(f: A => B): F[B]
+}
+    </pre>
+    <p>The next concept is <em class="term">Applicative Functor</em>. Applicatives provide semantics for the <em class="term">apply</em> operation. Since apply has a special meaning in Scala, apply in the Applicative sense is often renamed to something like <em>ap</em> or <em>app</em>. Whereas <em>map</em> allows us to apply a plain function to a value in a context, <em>apply</em> allows us to apply a function in a context to a value in a context. All Applicatives are also Functors.</p>
+    <pre class="code">
+trait Applicative[F[_]] extends Functor[F] {
+  def app[A, B](fa: F[A])(f: F[A => B]): F[B]
+}
+    </pre>
+    <p>Finally, the core concept of this tutorial, <em class="term">Monad</em>. Monads provide semantics for <em class="term">flatMap</em> (aka <em class="term">>>=</em> aka <em class="term">bind</em>). Monads provide us with a crucial new capability &mdash; to change the instance of the context, for example changing Left to Right for Either. All Monads are also Applicative Functors.</p>
+    <pre class="code">
+trait Monad[F[_]] extends Applicative[F] {
+  def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
+}
+    </pre>
+    <p>Looking at these rather dense definitions is enough to make your head spin. But, if we substitute a familiar pattern, we'll see how they make much more sense.</p>
+    <pre class="code">
+object OptionMonad extends Monad[Option] {
+  def map[A, B](option: Option[A])(f: A => B): Option[B]
+  def app[A, B](option: Option[A])(f: Option[A => B]): Option[B]
+  def flatMap[A, B](option: Option[A])(f: A => Option[B]): Option[B]
+}
+  </pre>
+  </article>
+  
+  <article class="story emerald-right">
+    <header class="topic topic-left">
+      Make-a-monad
+    </header>
+    <p>So, what's in a monad? Let's find out by making one of our very own.</p>
+    <p>We want to make a new list-like thing, which will contain elements but also contain a fractional probability, or weight, for each element. We also want it to behave like a monad so that we can compose operations in this context using the monadic vocabulary and semantics.</p>
+    <p>We'll call this new type PList[A]. It will be generic to the type of its elements, so it has a type parameter. PList is hence a type constructor, which is also a requirement for monads.</p>
+    <p>We can model the elements as 2-tuples (A, Rational), borrowing the Rational type from the Spire library.</p>
+    <p>Building up the monadic interface is simple enough for most part, since we can borrow most everything from List. However, how should we implement <em>flatten</em>?</p>
+    <pre class="code">
+val xs: PList[String] = PList(PList("foo" -> (1 r 2), "bar" -> (1 r 2)) -> (1 r 2), ...)
+    </pre>
+    <p>Here (1 r 2) represents &frac12;. So, <em>foo</em> and <em>bar</em> together have weight &frac12; in the outer list. Each then takes one half of the inner list. Hence, to flatten the list, it would probably make sense to have each have weight &frac14; in the flattened list i.e. multiply the weights of each of the inner elements with the weight of the sub-list.</p>
+    <p>This still leaves us the case where multiple sub-lists contain the same element key. With the basic implementation, these values would repeat with their respective weights in the flattened list. However, these can simply be merged by taking their sum.</p>
+  </article>
+  
+  <article class="story peterriver-left">
+    <header class="topic topic-right">
+      Monad laws
+    </header>
+    <p>We've established so far that monads have particular operations (whose names vary) with particular type signatures. But what about the implementations? Is any implementation that satisfies the type signature a valid monad?</p>
+    <p>Nope! As it turns out, there exists further a particular set of rules, known as monad laws, that a type needs to satisfy in order to qualify as a monad.</p>
+  </article>
+  
+</div>
+</body>
+</html>
