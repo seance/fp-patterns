@@ -40,7 +40,7 @@ trait Functor[F[_]] {
     <p>The next concept is <em class="term">Applicative Functor</em>. Applicatives provide semantics for the <em class="term">apply</em> operation. Since apply has a special meaning in Scala, apply in the Applicative sense is often renamed to something like <em>ap</em> or <em>app</em>. Whereas <em>map</em> allows us to apply a plain function to a value in a context, <em>apply</em> allows us to apply a function in a context to a value in a context. All Applicatives are also Functors.</p>
     <pre class="code">
 trait Applicative[F[_]] extends Functor[F] {
-  def app[A, B](fa: F[A])(f: F[A => B]): F[B]
+  def ap[A, B](fa: F[A])(f: F[A => B]): F[B]
 }
     </pre>
     <p>Finally, the core concept of this tutorial, <em class="term">Monad</em>. Monads provide semantics for <em class="term">flatMap</em> (aka <em class="term">>>=</em> aka <em class="term">bind</em>). Monads provide us with a crucial new capability &mdash; to change the instance of the context, for example changing Left to Right for Either. All Monads are also Applicative Functors.</p>
