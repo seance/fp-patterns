@@ -42,8 +42,16 @@
     </header>
     <p>Once again, let's first see how an eventual value in a Future context can be introspected and unwrapped.</p>
     <p>A value of type Future[A] is either completed or not completed. Once completed, it may have successfully completed or it may have failed. Scala's Future provides <em>isCompleted</em> and <em>value</em> methods, which are both non-blocking and return immediately. The Future's value is an Option[Try[A]] &mdash; None while incomplete &mdash; with concrete Try[A] instances Success[A] and Failure. A Failure always contains a Throwable instance here.</p>
-    <p>Callbacks can be attached to either successful or unsuccessful completion, or both, via <em>onSuccess</em>, <em>onFailure</em> and <em>onComplete</em>. Multiple callbacks can be registered, and they may execute immediately or asynchronously, without any guarantee of ordering.</p>
+    <p>Callbacks can be attached to either successful or unsuccessful completion, or both, via <em>onSuccess</em>, <em>onFailure</em> and <em>onComplete</em>. Multiple callbacks can be registered, and they may execute immediately or asynchronously, without any guarantee of ordering. Callbacks do not return values, and are hence used for side effects only.</p>
     <p>Finally, a Future <em>f</em> can be blockingly waited on via <em>Await.ready(f)</em> or <em>Await.result(f)</em>. The former returns the Future itself after it is completed, while the latter simply returns its value &mdash; or, throws the exception that had caused the Future to fail, if that is the case.</p>
+    <div class="example" data-name="Token futures are always completed"></div>
+    <div class="example" data-name="Also when they are failed"></div>
+    <div class="example" data-name="This future should be pending still"></div>
+    <div class="example" data-name="Callbacks are for side effects"></div>
+    <div class="example" data-name="Futures fire only the appropriate callbacks"></div>
+    <div class="example" data-name="Await can be used to block a future until ready"></div>
+    <div class="example" data-name="Await can also just pick the result when available"></div>
+    <div class="example" data-name="Awaiting for the result of a failed future will re-throw"></div>
   </article>
   
   <article class="story peterriver-left">
@@ -63,6 +71,10 @@ def getTemperature(city: String): Future[String] // Raw JSON string with all kin
 def getTemperature(city: String): Future[Double] // Current temperature, in &deg;C, of the city
     </pre>
     <p>The solution to this seemingly insurmountable problem lies of course with composition.</p>
+    <div class="example" data-name="Simply incrementing the result"></div>
+    <div class="example" data-name="We can also put functions in any contexts"></div>
+    <div class="example" data-name="Transformations can be chained one after another"></div>
+    <div class="example" data-name="Let's make sure we have temperatures in Celcius"></div>
   </article>
   
   <article class="story sunflower-right">
@@ -74,7 +86,7 @@ def getTemperature(city: String): Future[Double] // Current temperature, in &deg
     <p>Futures differ from the previous patterns the way that they deal with a new concern from the real world &mdash; time. This fact creates a special consideration for flatMap. With flatMap, we know we'll be dealing with another future. With Scala's futures, the newly created Future starts running right away in a background thread (pooled from an <em>ExecutionContext</em> behind the scenes). This means that futures joined in the following construct...</p>
     <pre class="code">
 for {
-  v1 <- createFuture1
+  v1 <- createFuture1 // &lt;- flatMap here
   v2 <- createFuture2
 }
 yield ...
@@ -93,11 +105,10 @@ for {
 yield ...
     </pre>
     <p>Now, clearly, the futures are created first and will execute in parallel. As in the previous example, the result of the for yield expression is a Future that will complete when both of the joined futures have completed.</p>
-    <p>Future.sequence</p>
-    <p>Scalaz sequence/sequenceU</p>
-    <p>Arbitrary number of cities: sequence, List tie-in</p>
-<!--  Composing value with Future.successful  -->
-<!--  Future.sequence List[Future[Either[A, B]]] => Future[Either[A, List[B]]]-->
+    <div class="example" data-name="Let's make sure our futures run in parallel"></div>
+    <div class="example" data-name="Hot or cold"></div>
+    <div class="example" data-name="Could Brazil actually not be warmest, ever"></div>
+    <div class="example" data-name="What's the weather like in Ankh-Morpork"></div>
   </article>
   
   <article class="story turquoise-left">
@@ -123,6 +134,13 @@ getData(...).flatMap(parseSomething)
     <p>Hmm. Something seems to be a bit amiss. The service call's Either is wrapped in a Future, while the parse/validation function's result isn't. These values cannot be directly composed.</p>
     <p>Looks like we have two options &mdash; lift the parse/validation code to Future, for example using Future.successful, or, use a normal map and then reach into the resulting Future (now containing a nested Either) with another map and flatten the inner structure using Either's joinRight.</p>
     <p>Both methods are simpler than what they sound like, and will do fine for now. But, let's make a mental note of this little kink. We'll be revisiting this issue later.</p>
+    <p>However, there's something that Dispatch does provide. Namely, we'll notice that with Dispatch's helpers in the implicit scope, we can call <span class="cmd">.left</span> and <span class="cmd">.right</span> on a future that wraps an either, Future[Either[A, B]] for some types A and B.</p>
+    <p>Hmm. This is curious &mdash; we can "pretend" that the Future layer doesn't exist, and just project left or right. This seems handy, and we'll also remember this little detail for later.</p>
+    <div class="example" data-name="What's the weather like in Ankh-Morpork now then"></div>
+    <div class="example" data-name="We're still in Celcius, right"></div>
+    <div class="example" data-name="Tampere's weather should go BOOM, but not really"></div>
+    <div class="example" data-name="Man it's cold in Vostok"></div>
+    <div class="example" data-name="Oulu should be safe enough competition for Brazil"></div>
   </article>
   
   <article class="story amethyst-right">

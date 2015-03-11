@@ -25,6 +25,24 @@ class Meditation extends Specification with NoTimeConversions {
   }
 }
 
+class EqualException(val message: String) extends Exception with Equals {
+  def canEqual(other: Any) = {
+    other.isInstanceOf[fpp.specs.EqualException]
+  }
+
+  override def equals(other: Any) = {
+    other match {
+      case that: fpp.specs.EqualException => that.canEqual(EqualException.this) && message == that.message
+      case _ => false
+    }
+  }
+
+  override def hashCode() = {
+    val prime = 41
+    prime + message.hashCode
+  }
+} 
+
 class AkkaNotifier extends Notifier {
   
   var system: ActorSystem = _
