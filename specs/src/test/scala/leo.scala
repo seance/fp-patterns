@@ -11,23 +11,23 @@ class Leo extends Meditation {
     val e2: Either[String, Int] = Left("BOOM")
     
     "Option's toRight needs help with None" ! {
-      (o1.toRight("BANG") must_== __) and
-      (o2.toRight("BOOM") must_== __)
+      (o1.toRight("BANG") must_== Right(3)) and
+      (o2.toRight("BOOM") must_== Left("BOOM"))
     }
     
     "Option's toLeft is analogous but seldom needed" ! {
-      (o1.toLeft("FOO") must_== __) and
-      (o2.toLeft(__) must_== Right("BAR"))
+      (o1.toLeft("FOO") must_== Left(3)) and
+      (o2.toLeft("BAR") must_== Right("BAR"))
     }
     
     "Either's right projection turns easily into Option" ! {
-      (e1.right.toOption must_== __) and
-      (e2.right.toOption must_== __)
+      (e1.right.toOption must_== Some(5)) and
+      (e2.right.toOption must_== None)
     }
     
     "Either's left projection works similarly" ! {
-      (e1.left.toOption must_== __) and
-      (e2.left.toOption must_== __)
+      (e1.left.toOption must_== None) and
+      (e2.left.toOption must_== Some("BOOM"))
     }
     
     object NetLibraryWithChannels {
@@ -63,14 +63,19 @@ class Leo extends Meditation {
      * to work. Since we're dealing with Either, you must also use the proper
      * projections for the compositions.
      */
-    def slurp(url: String, chankey: String): Either[String, String] = __
+    def slurp(url: String, chankey: String): Either[String, String] = for {
+      conn <- connect(url).right
+      chan <- getChannel(conn, chankey).toRight(s"Channel $chankey not found").right
+      cnts <- read(chan).right
+    }
+    yield cnts
     
     "Slurping with keyed channels" ! {
-      (slurp("badhost", "3chan") must_== __) and
+      (slurp("badhost", "3chan") must_== Left("Connection refused")) and
       (slurp("host2", "4chan") must_== Left("Channel 4chan not found")) and
       (slurp("host3", "5chan") must_== Left("Channel 5chan not found")) and
-      (slurp("host4", "2chan") must_== __) and
-      (slurp("host5", "3chan") must_== __)
+      (slurp("host4", "2chan") must_== Left("Error reading channel 2chan")) and
+      (slurp("host5", "3chan") must_== Right("Channel 3chan contents"))
     }
   }
   
@@ -83,13 +88,13 @@ class Leo extends Meditation {
     val o2: Option[Double] = None
     
     "Maybe getting Some head" ! {
-      (xs1.headOption must_== __) and
-      (xs2.headOption must_== __)
+      (xs1.headOption must_== Some("Good")) and
+      (xs2.headOption must_== None)
     }
     
     "Option is like one-element or empty list" ! {
-      (o1.toList must_== __) and
-      (o2.toList must_== __)
+      (o1.toList must_== List("Hello")) and
+      (o2.toList must_== List())
     }
     
     val xs3 = List(Some(9), None, Some(5), Some(7), None, Some(3))
@@ -106,19 +111,25 @@ class Leo extends Meditation {
      * Scalaz to get a Option[NonEmptyList[Int]]. Then map over the Option and
      * take the sum of the elements (found in the NEL's `list` member).
      */
-    def someSum(xs: List[Option[Int]]): Option[Int] = __
+    def someSum(xs: List[Option[Int]]): Option[Int] = (for {
+      o <- xs
+      n <- o.toList // .toList is optional, Scala predefines an implicit conversion Option => List
+    }
+    yield n).toNel.map(_.list.sum)
     
     /**
      * This time use flatMap and List's reduceOption method using Int's max
      * method as the reducer to find the maximum, if any.
      */
-    def someMax(xs: List[Option[Int]]): Option[Int] = __
+    def someMax(xs: List[Option[Int]]): Option[Int] =
+      xs.flatMap(_.toList).reduceOption(_ max _)
       
     /**
      * Implement here as above but now we'll make the function a higher-order
      * function which takes the reducer function as a parameter.
      */
-    def someOp(xs: List[Option[Int]], op: (Int, Int) => Int): Option[Int] = __
+    def someOp(xs: List[Option[Int]], op: (Int, Int) => Int): Option[Int] =
+      xs.flatMap(_.toList).reduceOption(op)
       
     def min = (_: Int) min (_: Int)
     def mod = (_: Int) % (_: Int)
@@ -146,7 +157,7 @@ class Leo extends Meditation {
     
     val xs1: List[Int] = List(1, 2, 3)
     val xs2: List[Int] = List()
-      
+    
     import scalaz.syntax.std.list._
       
     def noItems = "No items"
@@ -155,15 +166,16 @@ class Leo extends Meditation {
      * Sum items, if any. Otherwise, produce Left using the noItems helper
      * function. Use toNel and Option to Either conversion.
      */
-    def sumMandatoryItems(xs: List[Int]): Either[String, Int] = __
+    def sumMandatoryItems(xs: List[Int]): Either[String, Int] =
+      xs.toNel.map(_.list.sum).toRight(noItems)
     
     /**
      * This function retains the same signature as the above function.
      * However, this time an empty argument list should result in a
-     * Right containing zero sum. Hint - any value can be made into a
-     * NonEmptyList using the implicit wrapNel method.
+     * Right containing zero sum.
      */
-    def sumOptionalItems(xs: List[Int]): Either[String, Int] = __
+    def sumOptionalItems(xs: List[Int]): Either[String, Int] =
+      Right(xs.toNel.map(_.list.sum).getOrElse(0))
       
     "Sum of mandatory items with non-empty list succeeds" ! {
       sumMandatoryItems(xs1) must_== Right(6)
