@@ -6,17 +6,22 @@ class Futures extends Meditation {
   
   "Future basics" in {
     
-    def printThread(key: String) { println(s"$key: ${Thread.currentThread}") }
-    def showThread[A](key: String, x: A = ()) = { printThread(key); x }
+    case class ThreadAndValue(thread: String, value: Int)
     
-    showThread("Test runner")
+    def threadAndValue(x: Int) = ThreadAndValue(Thread.currentThread.getName, x)
+    
+    val runnerThread = Thread.currentThread.getName
     
     "Token Futures can be built via Future.successful" ! {
-      Future.successful(showThread("Future.successful", 1)) must be_==(__).await
+      val ftv = Future.successful(threadAndValue(1))
+      (ftv.map(_.thread) must be_==(runnerThread).await) and
+      (ftv.map(_.value)  must be_==(1).await)
     }
     
     "Future() dispatches a new task in an execution context" ! {
-      Future(showThread("Future.apply", 2)) must be_==(__).await
+      val ftv = Future(threadAndValue(2)) // Future() has call-by-name semantics
+      (ftv.map(_.thread) must be_!=(runnerThread).await) and
+      (ftv.map(_.value)  must be_==(2).await)
     }
   }
   
@@ -37,15 +42,15 @@ class Futures extends Meditation {
     def f3: Future[Int] = after(1 second, 42)
     
     "Token futures are always completed" ! {
-      f1.isCompleted must_== __
+      f1.isCompleted must_== true
     }
     
     "Also when they are failed" ! {
-      f2.isCompleted must_== __
+      f2.isCompleted must_== true
     }
     
     "This future should be pending still" ! {
-      f3.value must_== __
+      f3.value must_== None
     }
     
     var sideEffect: Int = 0
@@ -54,7 +59,7 @@ class Futures extends Meditation {
       f1.onComplete { _try => sideEffect = _try.getOrElse(10) }
       Thread.sleep(1)
       
-      sideEffect must_== __
+      sideEffect must_== 5
     }
     
     "Futures fire only the appropriate callbacks" ! { // but *you* must not forget mutable state!
@@ -62,19 +67,19 @@ class Futures extends Meditation {
       f2.onSuccess { case _ => sideEffect = 3 }
       Thread.sleep(1)
       
-      sideEffect must_== __
+      sideEffect must_== 5
     }
     
     "Await can be used to block a future until ready" ! {
-      Await.ready(f3, 2 seconds).value must_== __
+      Await.ready(f3, 2 seconds).value must_== Some(Success(42))
     }
     
     "Await can also just pick the result when available" ! {
-      Await.result(f3, 2 seconds) must_== __
+      Await.result(f3, 2 seconds) must_== 42
     }
     
     "Awaiting for the result of a failed future will re-throw" ! {
-      Await.result(f2, 1 second) must throwA[__]
+      Await.result(f2, 1 second) must throwA[Exception]
     }
   }
   
@@ -115,7 +120,8 @@ class Futures extends Meditation {
      * Use getWeather and map with pickTempKelvin to get city temperature in
      * Kelvin. Then, continue the transformation pipeline via kelvinToCelcius.
      */
-    def getTemperature(city: String): Future[Double] = __
+    def getTemperature(city: String): Future[Double] =
+      getWeather(city).map(pickTempKelvin).map(kelvinToCelcius)
   }
   
   "Composition using map" in {
@@ -125,15 +131,15 @@ class Futures extends Meditation {
     val f2 = Future.successful((_: String) + "!")
     
     "Simply incrementing the result" ! {
-      f1.__ must be_==(2).await
+      f1.map(1+) must be_==(2).await
     }
     
     "We can also put functions in any contexts" ! {
-      f2.map(f => f("Hello")) must be_==(__).await
+      f2.map(f => f("Hello")) must be_==("Hello!").await
     }
     
     "Transformations can be chained one after another" ! {
-      f1.map(2*).map(3*).map(4*) must be_==(__).await
+      f1.map(2*).map(3*).map(4*) must be_==(24).await
     }
     
     "Let's make sure we have temperatures in Celcius" ! {
@@ -152,13 +158,27 @@ class Futures extends Meditation {
      * through the `sleepy` function. Make sure your futures run in parallel.
      * Use for yield or flatMap.
      */
-    def parallelSleepySum(x: Int, y: Int): Future[Int] = __
+    def parallelSleepySum(x: Int, y: Int): Future[Int] = {
+      val fx = sleepy(x)
+      val fy = sleepy(y)
+      
+      for (x <- fx; y <- fy) yield x + y
+    }
     
     /**
      * Get temperatures for both cities, then return the (city, temperature)
      * pair for the warmer city. Use for yield.
      */
-    def selectWarmer(cityA: String, cityB: String): Future[(String, Double)] = __
+    def selectWarmer(cityA: String, cityB: String): Future[(String, Double)] = {
+      val tempAF = getTemperature(cityA)
+      val tempBF = getTemperature(cityB)
+      
+      for {
+        tempA <- tempAF
+        tempB <- tempBF
+      }
+      yield if (tempA > tempB) (cityA, tempA) else (cityB, tempB)
+    }
     
     /**
      * Get temperatures for each city, resulting in List[Future[Double]]. Then,
@@ -168,7 +188,8 @@ class Futures extends Meditation {
      * obtain (city, temperature) pairs when mapping over the Future. Find the
      * maximum pair using `maxBy` and the `tempC` helper (partial) function.
      */
-    def selectWarmest(cities: List[String]): Future[(String, Double)] = __
+    def selectWarmest(cities: List[String]): Future[(String, Double)] =
+      Future.sequence(cities.map(getTemperature)).map(cities.zip(_).maxBy(tempC))
     
     "Let's make sure our futures run in parallel" ! {
       parallelSleepySum(1, 2) must be_==(3).await(0, 2.5 seconds)
@@ -243,7 +264,12 @@ class Futures extends Meditation {
      * future wrapped either. Make sure to convert the Kelvin temperature to
      * Celcius at the end.
      */
-    def getTemperature(city: String): Future[Either[Throwable, Double]] = __
+    def getTemperature(city: String): Future[Either[Throwable, Double]] = for {
+      _ <- Future.successful(isValidCity(city)).right
+      w <- getWeather(city).right
+      k <- Future.successful(pickTempKelvin(w)).right
+    }
+    yield kelvinToCelcius(k)
   }
   
   "Future and Either" in {
@@ -269,7 +295,16 @@ class Futures extends Meditation {
      * Select warmer city works as earlier, but now we have to use projection
      * to be able to map while respecting Either semantics.
      */
-    def selectWarmer(cityA: String, cityB: String): CT = __
+    def selectWarmer(cityA: String, cityB: String): CT = {
+      val tempAF = getTemperature(cityA)
+      val tempBF = getTemperature(cityB)
+      
+      for {
+        tempA <- tempAF.right
+        tempB <- tempBF.right
+      }
+      yield if (tempA > tempB) (cityA, tempA) else (cityB, tempB)
+    }
     
     /**
      * Here's where things get a bit tricky. We'll start as before with
@@ -292,7 +327,10 @@ class Futures extends Meditation {
      * projection with the old `zip` trick and finally `maxBy` with `tempC` for
      * the maximum pair.
      */
-    def selectWarmest(cities: List[String]): CT = __
+    def selectWarmest(cities: List[String]): CT = for {
+      temps <- Future.sequence(cities.map(getTemperature))
+    }
+    yield temps.sequenceU.right.map(cities.zip(_).maxBy(tempC))
     
     "What's the weather like in Ankh-Morpork now then" ! {
       getTemperature("Ankh-Morpork") must
