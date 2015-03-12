@@ -4,9 +4,9 @@ class Eithers extends Meditation {
   
   "Either basics" in {
     
-    "Right wraps success value" ! (__ must beRight("Success"))
+    "Right wraps success value" ! (Right("Success") must beRight("Success"))
       
-    "Left wraps error value" ! (__ must beLeft("Error"))
+    "Left wraps error value" ! (Left("Error") must beLeft("Error"))
   }
   
   "Folding and introspecting" in {
@@ -14,18 +14,18 @@ class Eithers extends Meditation {
     val e1: Either[String, Int] = Right(5)
     val e2: Either[String, Int] = Left("Fail")
       
-    "We can check if we have a Right instance" ! (e1.isRight must_== __)
+    "We can check if we have a Right instance" ! (e1.isRight must_== true)
       
-    "Or if we have a Left instance" ! (e2.isLeft must_== __)
+    "Or if we have a Left instance" ! (e2.isLeft must_== true)
       
     "Folding produces an unwrapped value" ! {
       e1.fold(left => s"It's Left",
-              right => s"It's Right") must_== __
+              right => s"It's Right") must_== "It's Right"
     }
     
     "Folding can be used as a fallback also" ! {
       e2.fold(left => 42,
-              right => right) must_== __
+              right => right) must_== 42
     }
   }
   
@@ -35,11 +35,11 @@ class Eithers extends Meditation {
     val e2: Either[String, Int] = Left("Fail")
     
     "Use the 'right' method to get a Right projection" ! {
-      e1.__ must beAnInstanceOf[Either.RightProjection[String, Int]]
+      e1.right must beAnInstanceOf[Either.RightProjection[String, Int]]
     }
     
     "Left projection is seldom needed in practise" ! {
-      e1.__ must beAnInstanceOf[Either.LeftProjection[String, Int]]
+      e1.left must beAnInstanceOf[Either.LeftProjection[String, Int]]
     }
   }
   
@@ -53,27 +53,27 @@ class Eithers extends Meditation {
     def appendBang(s: String) = s"$s!"
     
     "Mapping over right projection makes Right analogous to Some" ! {
-      e1.right.map(moduloFour) must_== __
+      e1.right.map(moduloFour) must_== Right(1)
     }
     
     "Mapping over left projection is similar for Left" ! {
-      e2.left.map(appendBang) must_== __
+      e2.left.map(appendBang) must_== Left("Boom!")
     }
     
     "With a right projection, Left is inert over mapping" ! {
-      e2.right.map(timesThree) must_== __
+      e2.right.map(timesThree) must_== Left("Boom")
     }
     
     "With a left projection, Right is similarly inert" ! {
-      e1.left.map(appendBang) must_== __
+      e1.left.map(appendBang) must_== Right(5)
     }
     
     "With map's static signature, each map must be preceded by projection" ! {
-      e1.__ must_== 3
+      e1.right.map(timesThree).right.map(moduloFour) must_== Right(3)
     }
     
     "This is true for left projection also" ! {
-      e2.__ must_== "Bang!!"
+      e2.left.map(appendBang).left.map(appendBang) must_== Left("Boom!!")
     }
   }
   
@@ -118,7 +118,8 @@ class Eithers extends Meditation {
      * Slurp composes connect and read into a single composite operation that
      * can report errors at each of its stages.
      */
-    def slurp(url: String): Either[String, String] = __
+    def slurp(url: String): Either[String, String] =
+      connect(url).right.flatMap(read)
     
     "Slurping from a good URL should yield its contents" ! {
       slurp("host0") must beRight("Host 0 contents")
@@ -135,13 +136,13 @@ class Eithers extends Meditation {
     "What happens if we slurp two URLs?" ! {
       slurp("host2").right.flatMap { c1 =>
         slurp("host4").right.map(c2 => c1 + c2) 
-      } must_== __
+      } must_== Right("Host 2 contentsHost 4 contents")
     }
     
     "What if one of them is bad?" ! {
       slurp("host3").right.flatMap { c1 =>
         slurp("host6").right.map(c2 => c1 + c2) 
-      } must_== __
+      } must_== Left("Error reading host 3")
     }
   }
   
@@ -152,7 +153,11 @@ class Eithers extends Meditation {
     /**
      * Reimplement slurp using the for yield construct.
      */
-    def slurp(url: String): Either[String, String] = __
+    def slurp(url: String): Either[String, String] = for {
+      c <- connect(url).right
+      s <- read(c).right
+    }
+    yield s
     
     "Slurping from a good URL should yield its contents #2" ! {
       slurp("host0") must beRight("Host 0 contents")
@@ -174,18 +179,22 @@ class Eithers extends Meditation {
      * Use slurp and composition with for yield. Remember to use the
      * appropriate projection(s).
      */
-    def slurpConcat(url1: String, url2: String): Either[String, String] = __
+    def slurpConcat(url1: String, url2: String): Either[String, String] = for {
+      c1 <- slurp(url1).right
+      c2 <- slurp(url2).right
+    }
+    yield c1 + c2
     
     "Slurping two good URLs with slurpConcat" ! {
-      slurpConcat("host2", "host4") must_== __
+      slurpConcat("host2", "host4") must_== Right("Host 2 contentsHost 4 contents")
     }
     
     "Slurping good and bad URL with slurpConcat" ! {
-      slurpConcat("host6", "host1") must_== __
+      slurpConcat("host6", "host1") must_== Left("Error reading host 1")
     }
     
     "Slurping bad and good URL with slurpConcat" ! {
-      slurpConcat("host3", "host8") must_== __
+      slurpConcat("host3", "host8") must_== Left("Error reading host 3")
     }
     
     def banana = for {
@@ -196,7 +205,7 @@ class Eithers extends Meditation {
     yield x3 
     
     "Left gracefully short-circuits contextual composition" ! {
-      banana must_== __
+      banana must_== Left("BOOM")
     }
   }
   
@@ -211,35 +220,35 @@ class Eithers extends Meditation {
     class Sub extends Super
     
     val sub = new Sub
-    val e4: Either[Either[String, Sub], Super] = Right(sub)
+    val e4: Either[Either[String, Sub], Super] = Left(Left("Confused?"))
     val e5: Either[Either[String, Sub], Super] = Left(Right(sub))
-    val e6: Either[Either[String, Sub], Super] = Left(Left("Confused?"))
+    val e6: Either[Either[String, Sub], Super] = Right(sub)
     
     val e7: Either[Exception, Either[Throwable, Int]] = Right(Right(1))
     val e8: Either[String, Int] = Right(1)
     
     "Joining right over Right gives the nested Either" ! {
-      e1.joinRight must_== __
+      e1.joinRight must_== Right(1)
     }
     
     "Joining right just as above" ! {
-      e2.joinRight must_== __
+      e2.joinRight must_== Left(ex)
     }
     
     "Joining right over Left gives the wrapping Either" ! {
-      e3.joinRight must_== __
+      e3.joinRight must_== Left(ex)
     }
     
     "Joining left over Left gives the nested Either" ! {
-      e4.joinLeft must_== __
+      e4.joinLeft must_== Left("Confused?")
     }
     
     "Joining left just as above" ! {
-      e5.joinLeft must_== __
+      e5.joinLeft must_== Right(sub)
     }
     
     "Joinining left over Right gives the wrapping Either" ! {
-      e6.joinLeft must_== __
+      e6.joinLeft must_== Right(sub)
     }
     
     // Uncomment to get compile errors
