@@ -4,9 +4,9 @@ class Options extends Meditation {
   
   "Option basics" in {
     
-    "Some wraps a value" ! (__ must beSome(42))
+    "Some wraps a value" ! (Some(42) must beSome(42))
 
-    "None represents a missing value" ! (__ must beNone)
+    "None represents a missing value" ! (None must beNone)
   }
   
   "Unwrapping and introspecting" in {
@@ -14,19 +14,19 @@ class Options extends Meditation {
     val optionA: Option[Int] = Some(1)
     val optionB: Option[Int] = None
 
-    "Introspecting reveals a value is present" ! (optionA.isEmpty must_== __)
+    "Introspecting reveals a value is present" ! (optionA.isEmpty must_== false)
 
-    "Or it may reveal that there is no value" ! (optionB.isDefined must_== __)
+    "Or it may reveal that there is no value" ! (optionB.isDefined must_== false)
 
-    "Option's value can be retrieved using get" ! (optionA.get must_== __)
+    "Option's value can be retrieved using get" ! (optionA.get must_== 1)
 
     "But getting from None throws an exception" ! {
-      optionB.get must throwA[__]
+      optionB.get must throwA[NoSuchElementException]
     }
 
     "Best practise is to always provide a fallback" ! {
-      (optionA.getOrElse(13) must_== __) and
-      (optionB.getOrElse(13) must_== __)
+      (optionA.getOrElse(13) must_== 1) and
+      (optionB.getOrElse(13) must_== 13)
     }
   }
   
@@ -40,30 +40,30 @@ class Options extends Meditation {
     def triple(x: Double): Double = x * 3
       
     "Mapping over Some produces Some" ! {
-      sqrt(9).map(increment) must_== __
+      sqrt(9).map(increment) must_== Some(4)
     }
     
     "Mapping over None is fine too, and produces None" ! {
-      sqrt(-1).map(increment) must_== __
+      sqrt(-1).map(increment) must_== None
     }
     
     "Things get interesting when combining compositions" ! {
-      (sqrt(9).map(increment).map(triple) must_== __) and
-      (sqrt(-1).map(increment).map(triple) must_== __)
+      (sqrt(9).map(increment).map(triple) must_== Some(12)) and
+      (sqrt(-1).map(increment).map(triple) must_== None)
     }
     
     /**
      * Function composition of increment and triple.
      */
-    def incrementTriple = __ // nested calls or `compose`
+    def incrementTriple = (triple _) compose (increment _) // nested calls or `compose`
     
     "Combined composition equals composed combination" ! {
       sqrt(9).map(increment).map(triple) must_== sqrt(9).map(incrementTriple)
     }
     
     "Composed computation need only be unwrapped at the end" ! {
-      (sqrt(9).map(increment).map(triple).getOrElse(__) must_== 12) and
-      (sqrt(-1).map(triple).map(increment).getOrElse(__) must_== 5)
+      (sqrt(9).map(increment).map(triple).getOrElse(0) must_== 12) and
+      (sqrt(-1).map(triple).map(increment).getOrElse(5) must_== 5)
     }
   }
   
@@ -75,15 +75,15 @@ class Options extends Meditation {
     def increment(x: Double): Double = x + 1
       
     "Composing sqrt with itself" ! {
-      sqrt(81).__ must_== Some(3)
+      sqrt(81).flatMap(sqrt) must_== Some(3)
     }
       
     "Composing the result of the above composition" ! {
-      sqrt(81) /* compose with sqrt and map over with increment */ must_== Some(4)
+      sqrt(81).flatMap(sqrt).map(increment) must_== Some(4)
     }
     
     "Option compositions can be composed as well" ! {
-      sqrt(__).flatMap(sqrt).flatMap(sqrt) must_== Some(3)
+      sqrt(6561).flatMap(sqrt).flatMap(sqrt) must_== Some(3)
     }
   }
   
@@ -96,10 +96,10 @@ class Options extends Meditation {
      * Computes the 4th root of given value.
      */
     def root4(x: Double): Option[Double] = for {
-      r2 <- __[Option[Double]] // replace __[Option[Double]]
-      r4 <- __[Option[Double]] // replace __[Option[Double]]
+      r2 <- sqrt(x)
+      r4 <- sqrt(r2)
     }
-    yield __
+    yield r4
     
     "Sqrt can be neatly composed with itself using for yield" ! {
       root4(81) must_== Some(3)
@@ -112,9 +112,9 @@ class Options extends Meditation {
     yield r + s
       
     "All the intermediate results are in scope at yield" ! {
-      (sqrtSum(9,  4) must_== __) and
-      (sqrtSum(9, -1) must_== __) and
-      (sqrtSum(-1, 4) must_== __)
+      (sqrtSum(9,  4) must_== Some(5)) and
+      (sqrtSum(9, -1) must_== None) and
+      (sqrtSum(-1, 4) must_== None)
     }
     
     def banana = for {
@@ -125,7 +125,7 @@ class Options extends Meditation {
     yield x3
     
     "None gracefully short-circuits contextual composition" ! {
-      banana must_== __
+      banana must_== None
     }
     
     def foo(x: Int) = Some(x+5)
@@ -142,9 +142,9 @@ class Options extends Meditation {
     yield a + b + c
       
     "Functions can be combined freely with Option composition" ! {
-      (quux(3) must_== __) and
-      (quux(2) must_== __) and
-      (quux(1) must_== __)
+      (quux(3) must_== Some(34)) and
+      (quux(2) must_== Some(30)) and
+      (quux(1) must_== Some(26))
     }
   }
   
@@ -157,17 +157,17 @@ class Options extends Meditation {
     // Some(1).flatten
       
     "Nested Option instances can be un-nested using flatten" ! {
-      (Some(Some(2)): Option2[Int]).flatten must_== __ 
+      (Some(Some(2)): Option2[Int]).flatten must_== Some(2)
     }
     
     "Flatten specifically un-nests only a single layer" ! {
-      (Some(Some(Some(3))): Option3[Int]).flatten must_== __
+      (Some(Some(Some(3))): Option3[Int]).flatten must_== Some(Some(3))
     }
     
     "Flattening respects flatMap semantics" ! {
-      ((Some(None): Option2[Int]).flatten must_== __) and
-      ((Some(None): Option3[Int]).flatten must_== __) and
-      ((Some(Some(None)): Option3[Int]).flatten must_== __)
+      ((Some(None): Option2[Int]).flatten must_== None) and
+      ((Some(None): Option3[Int]).flatten must_== None) and
+      ((Some(Some(None)): Option3[Int]).flatten must_== Some(None))
     }
   }
 }
