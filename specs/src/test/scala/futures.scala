@@ -6,17 +6,22 @@ class Futures extends Meditation {
   
   "Future basics" in {
     
-    def printThread(key: String) { println(s"$key: ${Thread.currentThread}") }
-    def showThread[A](key: String, x: A = ()) = { printThread(key); x }
+    case class ThreadAndValue(thread: String, value: Int)
+        
+    def threadAndValue(x: Int) = ThreadAndValue(Thread.currentThread.getName, x)
     
-    showThread("Test runner")
-    
+    val runnerThread = Thread.currentThread.getName
+      
     "Token Futures can be built via Future.successful" ! {
-      Future.successful(showThread("Future.successful", 1)) must be_==(__).await
+      val ftv = Future.successful(threadAndValue(1))
+      (ftv.map(_.thread) must be_==(runnerThread).await) and
+      (ftv.map(_.value)  must be_==(__).await)
     }
     
     "Future() dispatches a new task in an execution context" ! {
-      Future(showThread("Future.apply", 2)) must be_==(__).await
+      val ftv = Future(threadAndValue(2)) // Future() has call-by-name semantics
+      (ftv.map(_.thread) must be_!=(runnerThread).await) and
+      (ftv.map(_.value)  must be_==(__).await)
     }
   }
   
