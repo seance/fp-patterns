@@ -13,11 +13,11 @@ class Lists extends Meditation {
     }
     
     "Bounded ranges can be constructed using to" ! {
-      (1 to 6) must_== __
+      (1 to 6).toList must_== __
     }
     
     "And using until when we want a range with exclusive end" ! {
-      (1 until 6) must_== __
+      (1 until 6).toList must_== __
     }
       
     "List.range works similarly as until" ! {
@@ -25,7 +25,7 @@ class Lists extends Meditation {
     }
     
     "Bounded ranges can also vary by different steps" ! {
-      (1.0 to 3.0 by 0.5) must_== __
+      (1.0 to 3.0 by 0.5).toList must_== __
     }
   }
   
