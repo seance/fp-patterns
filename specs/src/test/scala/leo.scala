@@ -160,8 +160,7 @@ class Leo extends Meditation {
     /**
      * This function retains the same signature as the above function.
      * However, this time an empty argument list should result in a
-     * Right containing zero sum. Hint - any value can be made into a
-     * NonEmptyList using the implicit wrapNel method.
+     * Right containing zero sum.
      */
     def sumOptionalItems(xs: List[Int]): Either[String, Int] = __
       
