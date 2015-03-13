@@ -69,11 +69,11 @@ class Eithers extends Meditation {
     }
     
     "With map's static signature, each map must be preceded by projection" ! {
-      e1.__ must_== 3
+      e1.__ must_== Right(3)
     }
     
     "This is true for left projection also" ! {
-      e2.__ must_== "Bang!!"
+      e2.__ must_== Left("Boom!!")
     }
   }
   
@@ -211,9 +211,9 @@ class Eithers extends Meditation {
     class Sub extends Super
     
     val sub = new Sub
-    val e4: Either[Either[String, Sub], Super] = Right(sub)
+    val e4: Either[Either[String, Sub], Super] = Left(Left("Confused?"))
     val e5: Either[Either[String, Sub], Super] = Left(Right(sub))
-    val e6: Either[Either[String, Sub], Super] = Left(Left("Confused?"))
+    val e6: Either[Either[String, Sub], Super] = Right(sub)
     
     val e7: Either[Exception, Either[Throwable, Int]] = Right(Right(1))
     val e8: Either[String, Int] = Right(1)
