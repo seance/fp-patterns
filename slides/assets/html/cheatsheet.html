@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cheatsheet</title>
+  <link rel="icon" href="../img/favicon.ico" type="image/x-icon">
+  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Raleway:600|Open+Sans:300,400|Source+Sans+Pro:300'>
+  <link rel="stylesheet" href="../css/slides.css">
+  <script src="../js/jquery.min.js"></script>
+  <script src="../js/ace.js"></script>
+  <script src="../js/theme-slides.js"></script>
+  <script src="../js/mode-scala.js"></script>
+  <script src="../js/slides.js"></script>
+  <style>
+    .story + .story {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="connection"></div>
+
+  <h1>Scala Cheat Sheet</h1>
+
+  <p class="note">
+    A quick reference to some of the Scala language features used in rest of the tutorial.
+  </p>
+
+  <article class="story carrot-left">
+    <header class="topic topic-right">
+      General features
+    </header>
+    <p>Scala is a "C-like" language and will for most parts be intuitive for anyone familiar with another language in this style.</p>
+    <p>Some general pointers:</p>
+    <ul>
+      <li><p>Semicolons are optional, and not usually used</p></li>
+      <li><p>Types are static and use postfix notation. Type annotations are often optional and inferred</p>
+        <pre class="code">
+val x: Int = 42
+val s: String = "Hello world"
+val f: Int => Int = (x: Int) => x + 1
+        </pre>
+      </li>
+      <li><p>The underscore <span class="cmd">_</span> has multiple meanings but is usually a parameter placeholder in anonymous functions</p></li>
+      <li><p>Most everything is an expression, e.g. <em class="term">if ... else</em> expressions</p></li>
+    </ul>
+  </article>
+
+  <article class="story emerald-right">
+    <header class="topic topic-left">
+      Methods and functions
+    </header>
+    <p>Scala is a dual paradigm language, mixing features from Object Oriented Programming and Functional Programming.</p>
+    <p>Unlike Java, Scala has in addition to <em class="term">methods</em> the concept of <em class="term">functions</em>. Largely, these can be used interchangeably, but sometimes there is a slight difference.</p>
+    <pre class="code">
+class Foo(x: Int) {
+  def bar(y: Int): Int = x + y
+  val zut: Int => Int = (y: Int) => x + y
+}
+
+val foo = new Foo(42)
+val f = foo.bar _ // f: Int => Int, this type is inferred
+val g = foo.zut // g: Int => Int, this type is inferred
+    </pre>
+    <p>In the code above, <em>f</em> and <em>g</em> are both functions (closures), whereas <em>bar</em> is a method and <em>zut</em> is a function value of the class Foo. Notice how the underscore is used to convert the method into a function.</p>
+  </article>
+
+  <article class="story peterriver-left">
+    <header class="topic topic-right">
+      Parentheses, periods and the equals sign
+    </header>
+    <p>Scala's multiparadigm nature and emphasis on DSLs (domain specific languages) has some implications to the use of parentheses and periods.</p>
+    <pre class="code">
+class Foo(x: Int) {
+  def procedure(): Unit { ... } // notice parens &amp; no equals sign
+  def accessor: Int = ... // notice equals sign &amp; no parens
+}
+    </pre>
+    <p>Here <em>procedure</em>'s definition includes a pair of parentheses. This means that the caller of the method may or may not include the parens in the method call. The method <em>accessor</em>'s definition does not include parentheses, which means the call site must not either!</p>
+    <p>Methods whose return type is <em class="term">Unit</em> (much like Java's <em clas="term">void</em>) are considered procedures. Including the parens in the call site is considered good practise.</p>
+    <p>If a method definition lacks the equals sign (<em class="term">=</em>) before the method body, the method is automatically considered a procedure and it's type will be <em>Unit</em>. Forgetting the equals sign is a common pitfall for newer Scala programmers.</p>
+    <pre class="code">
+val x = 1.+(2)
+val y = 1 + 2
+    </pre>
+    <p>Techically, Scala has no operators, i.e. no special language level parsing of arithmetic or other operators. Instead, everything is a method call.</p>
+    <p>Hence, the above forms for <em>x</em> and <em>y</em> are equivalent. In fact, the latter form is simply a general syntactic sugaring for methods that take a single parameter; in this case, the <em class="term">+</em> method. This sugaring extends to any user defined functions as well, which is especially nice for DSLs.</p>
+  </article>
+
+  <article class="story sunflower-right">
+    <header class="topic topic-left">
+      Shorthand notation
+    </header>
+    <p><em><span class="bigquote">“</span>Brevity is the soul of wit<span class="bigquote">“</span></em>&mdash; William Shakespeare</p>
+    <p>Scala offers varying degrees of shorthand notation for function parameters.</p>
+    <pre class="code">
+val f1: Int => Int = (x: Int) => x + 1
+def f2(x: Int): Int = x + 1
+def f3: Int => Int = (_: Int) + 1
+def f4 = (_: Int) + 1
+def f5: Int => Int = _ + 1
+def f6: Int => Int = (1+)
+
+val xs: List[Int] = ...
+val ys = xs.map(1+)
+    </pre>
+    <p>All the functions <em>f</em> above denote the same thing: incrementing an integer value by one. The list mapping demonstrates the brevity of the ultimate shorthand notation, here <em>(1+)</em>.</p>
+    <p>Of course, sometimes legibility is more important than brevity. Which form is suitable for what context is a question of preference and style left to the reader.</p>
+  </article>
+
+  <article class="story turquoise-left">
+    <header class="topic topic-right">
+      The great beyond
+    </header>
+    <p>There is of course much more to Scala than presented here. However, this brief introduction should give you a good idea of the language features you will run into in this tutorial.</p>
+    <p>Good luck and hopefully you will enjoy the journey!</p>
+  </article>
+
+  <footer>
+    Functional Programming Patterns | Jukka Viinamäki | Futurice
+  </footer>
+</div>
+</body>
+</html>
